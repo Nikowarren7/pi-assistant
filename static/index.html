@@ -403,9 +403,20 @@
     btn.classList.toggle('active', ttsEnabled);
   }
 
-  async function speakText(text) {
+  // ── TTS chunk queue ──
+  const ttsQueue = [];
+  let ttsPlaying = false;
+
+  async function enqueueTTS(text) {
     if (!ttsEnabled || !text.trim()) return;
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    ttsQueue.push(text);
+    if (!ttsPlaying) playNextChunk();
+  }
+
+  async function playNextChunk() {
+    if (!ttsQueue.length) { ttsPlaying = false; return; }
+    ttsPlaying = true;
+    const text = ttsQueue.shift();
     try {
       const r = await fetch('/tts', {
         method: 'POST',
@@ -416,8 +427,19 @@
       const url = URL.createObjectURL(blob);
       currentAudio = new Audio(url);
       currentAudio.play();
-      currentAudio.onended = () => URL.revokeObjectURL(url);
-    } catch(e) { console.warn('TTS error:', e); }
+      currentAudio.onended = () => { URL.revokeObjectURL(url); playNextChunk(); };
+    } catch(e) { console.warn('TTS error:', e); playNextChunk(); }
+  }
+
+  function stopTTS() {
+    ttsQueue.length = 0;
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    ttsPlaying = false;
+  }
+
+  // Flush any remaining words in the buffer
+  async function speakText(text) {
+    if (text.trim()) await enqueueTTS(text);
   }
 
   document.getElementById('statSession').textContent = SESSION_ID.slice(4).toUpperCase();
@@ -488,16 +510,38 @@
       const reader = r.body.getReader();
       const decoder = new TextDecoder();
       let full = '';
+      let wordBuf = '';
+      let wordCount = 0;
+      stopTTS();
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        full += decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, { stream: true });
+        full += chunk;
         updateMessage(aiDiv, full);
+
+        // Chunk TTS: flush on punctuation or every 4 words
+        for (const char of chunk) {
+          wordBuf += char;
+          if (char === ' ' || char === '\n') {
+            wordCount++;
+            if (wordCount >= 4) {
+              enqueueTTS(wordBuf.trim());
+              wordBuf = '';
+              wordCount = 0;
+            }
+          } else if (/[.,!?;:\-]/.test(char)) {
+            enqueueTTS(wordBuf.trim());
+            wordBuf = '';
+            wordCount = 0;
+          }
+        }
       }
 
+      // Flush remainder
+      if (wordBuf.trim()) enqueueTTS(wordBuf.trim());
       updateMessage(aiDiv, full, true);
-      speakText(full);
     } catch (e) {
       updateMessage(aiDiv, 'Connection error: ' + e.message, true);
     }
@@ -548,6 +592,7 @@
 
   // ── Clear session ──
   async function clearSession() {
+    stopTTS();
     await fetch(`/sessions/${SESSION_ID}/clear`);
     document.getElementById('messages').innerHTML = '';
   }
