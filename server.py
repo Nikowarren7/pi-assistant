@@ -3,10 +3,12 @@ import uuid
 from datetime import datetime
 from typing import Optional
 from collections import deque
+from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 LM_STUDIO_URL = "http://10.0.0.1:1234/v1/chat/completions"
@@ -14,6 +16,13 @@ MODEL_ID = "qwen2.5-14b-instruct"
 SYSTEM_PROMPT = "You are a helpful local assistant running on a Raspberry Pi. Be concise and practical."
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
+
+
+@app.get("/")
+async def index():
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).parent / "static" / "index.html")
 
 # In-memory job queue
 queue: deque = deque()

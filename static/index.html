@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PI ASSISTANT</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:        #0a0b0d;
+      --surface:   #0f1115;
+      --panel:     #13161b;
+      --border:    #1e2530;
+      --accent:    #bd6b08;
+      --accent2:   #e8890a;
+      --glow:      #e8890a55;
+      --text:      #c9bfae;
+      --text-dim:  #5a5448;
+      --user-msg:  #1a1c22;
+      --ai-msg:    #111318;
+      --scratch:   #2a1a05;
+      --red:       #8b2020;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: var(--scratch);
+      box-shadow: 0 0 12px var(--glow);
+    }
+
+    .logo-mark svg { width: 18px; height: 18px; fill: var(--accent2); }
+
+    .title-block h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--accent2);
+      text-transform: uppercase;
+    }
+
+    .title-block p {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #444;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .status-dot.online  { background: #4caf50; box-shadow: 0 0 6px #4caf5088; }
+    .status-dot.busy    { background: var(--accent2); box-shadow: 0 0 6px var(--glow); }
+    .status-dot.offline { background: var(--red); }
+
+    .btn-clear {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-clear:hover { border-color: var(--accent); color: var(--accent2); }
+
+    /* ── Main layout ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 0;
+      gap: 4px;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      padding: 0 16px 8px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 16px;
+      font-size: 12px;
+    }
+
+    .stat-row span:first-child {
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .stat-row span:last-child {
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--accent2);
+      font-size: 12px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 10px 16px;
+    }
+
+    .queue-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 8px;
+    }
+
+    .queue-item {
+      padding: 8px 8px;
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--text-dim);
+      border-left: 2px solid transparent;
+      margin-bottom: 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .queue-item.done    { border-color: #4caf50; color: var(--text); }
+    .queue-item.processing { border-color: var(--accent2); color: var(--accent2); animation: pulse 1s infinite; }
+    .queue-item.error   { border-color: var(--red); }
+
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* ── Chat area ── */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 820px;
+    }
+
+    .msg-meta {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .msg.user .msg-meta { color: var(--accent); }
+
+    .msg-bubble {
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      line-height: 1.6;
+      font-size: 15px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg.user  .msg-bubble { background: var(--user-msg); border-color: #252830; }
+    .msg.ai    .msg-bubble {
+      background: var(--ai-msg);
+      border-left: 2px solid var(--accent);
+      border-color: var(--border);
+      border-left-color: var(--accent);
+    }
+
+    .msg.ai.streaming .msg-bubble::after {
+      content: '▋';
+      color: var(--accent2);
+      animation: blink 0.7s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Input bar ── */
+    .input-bar {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 14px 20px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+
+    .input-wrap {
+      flex: 1;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      display: flex;
+      align-items: flex-end;
+      transition: border-color 0.2s;
+    }
+    .input-wrap:focus-within { border-color: var(--accent); }
+
+    textarea {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 15px;
+      padding: 10px 14px;
+      resize: none;
+      min-height: 44px;
+      max-height: 160px;
+      line-height: 1.5;
+    }
+
+    textarea::placeholder { color: var(--text-dim); }
+
+    .send-btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      height: 44px;
+      flex-shrink: 0;
+    }
+    .send-btn:hover:not(:disabled) { background: var(--accent2); box-shadow: 0 0 16px var(--glow); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Corner decorations ── */
+    .corner-tl, .corner-br {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .corner-tl { top: 60px; left: 210px; border-top: 2px solid var(--accent2); border-left: 2px solid var(--accent2); }
+    .corner-br { bottom: 80px; right: 10px; border-bottom: 2px solid var(--accent2); border-right: 2px solid var(--accent2); }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18L20 8.5v7L12 19.82 4 15.5v-7L12 4.18z"/></svg>
+    </div>
+    <div class="title-block">
+      <h1>PI ASSISTANT</h1>
+      <p>Local Intelligence System</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">CHECKING</span>
+    </div>
+    <button class="btn-clear" onclick="clearSession()">CLEAR SESSION</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-label">System</div>
+    <div class="stat-row"><span>Model</span><span id="statModel">—</span></div>
+    <div class="stat-row"><span>Session</span><span id="statSession">CLI</span></div>
+    <div class="stat-row"><span>Queued</span><span id="statQueued">0</span></div>
+    <hr class="divider" />
+    <div class="sidebar-label">Queue</div>
+    <div class="queue-list" id="queueList"></div>
+  </div>
+
+  <div class="chat-area">
+    <div class="messages" id="messages"></div>
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea
+          id="input"
+          rows="1"
+          placeholder="Transmit message..."
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+      </div>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">SEND</button>
+    </div>
+  </div>
+</div>
+
+<div class="corner-tl"></div>
+<div class="corner-br"></div>
+
+<script>
+  const SESSION_ID = 'web-' + Math.random().toString(36).slice(2, 7);
+  let isStreaming = false;
+  const queuedJobs = {};
+
+  document.getElementById('statSession').textContent = SESSION_ID.slice(4).toUpperCase();
+
+  // ── Health check ──
+  async function checkHealth() {
+    try {
+      const r = await fetch('/health');
+      const d = await r.json();
+      document.getElementById('statusDot').className = 'status-dot online';
+      document.getElementById('statusText').textContent = 'ONLINE';
+      document.getElementById('statModel').textContent = d.model.split('-')[0].toUpperCase();
+      document.getElementById('statQueued').textContent = d.queued_jobs;
+    } catch {
+      document.getElementById('statusDot').className = 'status-dot offline';
+      document.getElementById('statusText').textContent = 'OFFLINE';
+    }
+  }
+
+  setInterval(checkHealth, 5000);
+  checkHealth();
+
+  // ── Message rendering ──
+  function addMessage(role, content, streaming = false) {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = `msg ${role}${streaming ? ' streaming' : ''}`;
+    const label = role === 'user' ? 'YOU' : 'QWEN';
+    div.innerHTML = `
+      <div class="msg-meta">${label} &nbsp;·&nbsp; ${new Date().toLocaleTimeString()}</div>
+      <div class="msg-bubble"></div>
+    `;
+    div.querySelector('.msg-bubble').textContent = content;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+  }
+
+  function updateMessage(div, content, done = false) {
+    div.querySelector('.msg-bubble').textContent = content;
+    if (done) div.classList.remove('streaming');
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+  }
+
+  // ── Send ──
+  async function sendMessage() {
+    const input = document.getElementById('input');
+    const msg = input.value.trim();
+    if (!msg || isStreaming) return;
+
+    isStreaming = true;
+    input.value = '';
+    autoResize(input);
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('statusDot').className = 'status-dot busy';
+    document.getElementById('statusText').textContent = 'PROCESSING';
+
+    addMessage('user', msg);
+    const aiDiv = addMessage('ai', '', true);
+
+    try {
+      const r = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, session_id: SESSION_ID, stream: true }),
+      });
+
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        full += decoder.decode(value, { stream: true });
+        updateMessage(aiDiv, full);
+      }
+
+      updateMessage(aiDiv, full, true);
+    } catch (e) {
+      updateMessage(aiDiv, 'Connection error: ' + e.message, true);
+    }
+
+    isStreaming = false;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('statusDot').className = 'status-dot online';
+    document.getElementById('statusText').textContent = 'ONLINE';
+  }
+
+  // ── Queue job ──
+  async function queueJob(message) {
+    const r = await fetch('/queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+    const d = await r.json();
+    queuedJobs[d.job_id] = { message, status: 'queued' };
+    renderQueue();
+    pollJob(d.job_id);
+    return d.job_id;
+  }
+
+  async function pollJob(jobId) {
+    const interval = setInterval(async () => {
+      const r = await fetch(`/queue/${jobId}`);
+      const d = await r.json();
+      queuedJobs[jobId] = d;
+      renderQueue();
+      document.getElementById('statQueued').textContent =
+        Object.values(queuedJobs).filter(j => j.status === 'queued' || j.status === 'processing').length;
+      if (d.status === 'done' || d.status === 'error') clearInterval(interval);
+    }, 1000);
+  }
+
+  function renderQueue() {
+    const list = document.getElementById('queueList');
+    list.innerHTML = '';
+    Object.entries(queuedJobs).reverse().forEach(([id, job]) => {
+      const div = document.createElement('div');
+      div.className = `queue-item ${job.status}`;
+      div.textContent = `[${id}] ${(job.message || '').slice(0, 22)}`;
+      div.title = job.result || job.message;
+      list.appendChild(div);
+    });
+  }
+
+  // ── Clear session ──
+  async function clearSession() {
+    await fetch(`/sessions/${SESSION_ID}/clear`);
+    document.getElementById('messages').innerHTML = '';
+  }
+
+  // ── Input helpers ──
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }
+</script>
+</body>
+</html>
