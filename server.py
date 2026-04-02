@@ -148,6 +148,7 @@ async def tts(req: TTSRequest):
     proc = await asyncio.create_subprocess_exec(
         str(PIPER_BIN),
         "--model", str(PIPER_MODEL),
+        "--length-scale", "1.25",
         "--output_file", out_path,
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.DEVNULL,

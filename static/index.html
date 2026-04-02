@@ -512,6 +512,7 @@
       let full = '';
       let wordBuf = '';
       let wordCount = 0;
+      let firstChunkSent = false;
       stopTTS();
 
       while (true) {
@@ -521,20 +522,23 @@
         full += chunk;
         updateMessage(aiDiv, full);
 
-        // Chunk TTS: flush on punctuation or every 4 words
+        // First chunk fires at 4 words, subsequent chunks at 8
+        const threshold = firstChunkSent ? 8 : 4;
         for (const char of chunk) {
           wordBuf += char;
           if (char === ' ' || char === '\n') {
             wordCount++;
-            if (wordCount >= 4) {
+            if (wordCount >= threshold) {
               enqueueTTS(wordBuf.trim());
               wordBuf = '';
               wordCount = 0;
+              firstChunkSent = true;
             }
           } else if (/[.,!?;:\-]/.test(char)) {
             enqueueTTS(wordBuf.trim());
             wordBuf = '';
             wordCount = 0;
+            firstChunkSent = true;
           }
         }
       }
