@@ -617,8 +617,6 @@
       const decoder = new TextDecoder();
       let full    = '';
       let wordBuf = '';
-      let wordCount = 0;
-      let firstChunkSent = false;
       stopTTS();
 
       while (true) {
@@ -628,18 +626,11 @@
         full += chunk;
         updateMessage(aiDiv, full);
 
-        const threshold = firstChunkSent ? cfgSubsequentWords : cfgInitialWords;
-        for (const char of chunk) {
+          for (const char of chunk) {
           wordBuf += char;
-          if (char === ' ' || char === '\n') {
-            wordCount++;
-            if (wordCount >= threshold) {
-              enqueueTTS(wordBuf.trim());
-              wordBuf = ''; wordCount = 0; firstChunkSent = true;
-            }
-          } else if (/[.,!?;:\-]/.test(char)) {
+          if (/[.!?;]/.test(char) && wordBuf.trim().length > 2) {
             enqueueTTS(wordBuf.trim());
-            wordBuf = ''; wordCount = 0; firstChunkSent = true;
+            wordBuf = '';
           }
         }
       }

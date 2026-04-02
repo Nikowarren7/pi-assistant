@@ -15,9 +15,10 @@ from pydantic import BaseModel
 PIPER_BIN        = Path(__file__).parent / "piper/piper/piper"
 PIPER_VOICES_DIR = Path(__file__).parent / "piper/voices"
 
-LM_STUDIO_URL = "http://10.0.0.1:1234/v1/chat/completions"
-MODEL_ID      = "qwen2.5-14b-instruct"
-SYSTEM_PROMPT = "You are a helpful local assistant running on a Raspberry Pi. Be concise and practical."
+LM_STUDIO_URL  = "http://10.0.0.1:1234/v1/chat/completions"
+MODEL_ID       = "qwen2.5-14b-instruct"
+SYSTEM_PROMPT  = "You are a helpful local assistant running on a Raspberry Pi. Be concise and practical."
+HISTORY_LIMIT  = 10  # number of user+assistant turns to keep per session
 
 # ── TTS config (mutable at runtime) ──────────────────────────────────────────
 tts_config = {
@@ -93,11 +94,18 @@ async def chat(req: ChatRequest):
 
     sessions[session_id].append({"role": "user", "content": req.message})
 
+    # Keep system prompt + last HISTORY_LIMIT turns (2 messages per turn)
+    system = sessions[session_id][:1]
+    history = sessions[session_id][1:]
+    if len(history) > HISTORY_LIMIT * 2:
+        history = history[-(HISTORY_LIMIT * 2):]
+    trimmed = system + history
+
     if req.stream:
         async def stream_response():
             import json
             full = ""
-            async for chunk in call_lm_studio(sessions[session_id], stream=True):
+            async for chunk in call_lm_studio(trimmed, stream=True):
                 try:
                     data  = json.loads(chunk)
                     token = data["choices"][0]["delta"].get("content", "")
@@ -111,7 +119,7 @@ async def chat(req: ChatRequest):
         return StreamingResponse(stream_response(), media_type="text/plain")
     else:
         result = ""
-        async for chunk in call_lm_studio(sessions[session_id]):
+        async for chunk in call_lm_studio(trimmed):
             result = chunk
         sessions[session_id].append({"role": "assistant", "content": result})
         return {"reply": result, "session_id": session_id}
