@@ -1,5 +1,7 @@
 import asyncio
 import uuid
+import subprocess
+import tempfile
 from datetime import datetime
 from typing import Optional
 from collections import deque
@@ -7,9 +9,12 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+PIPER_BIN   = Path(__file__).parent / "piper/piper/piper"
+PIPER_MODEL = Path(__file__).parent / "piper/voices/en_US-lessac-medium.onnx"
 
 LM_STUDIO_URL = "http://10.0.0.1:1234/v1/chat/completions"
 MODEL_ID = "qwen2.5-14b-instruct"
@@ -125,6 +130,34 @@ async def get_job(job_id: str):
 async def clear_session(session_id: str):
     sessions.pop(session_id, None)
     return {"cleared": session_id}
+
+
+class TTSRequest(BaseModel):
+    text: str
+
+
+@app.post("/tts")
+async def tts(req: TTSRequest):
+    text = req.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="No text provided")
+
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        out_path = f.name
+
+    proc = await asyncio.create_subprocess_exec(
+        str(PIPER_BIN),
+        "--model", str(PIPER_MODEL),
+        "--output_file", out_path,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL,
+    )
+    await proc.communicate(input=text.encode())
+
+    audio = Path(out_path).read_bytes()
+    Path(out_path).unlink(missing_ok=True)
+    return Response(content=audio, media_type="audio/wav")
 
 
 @app.get("/health")

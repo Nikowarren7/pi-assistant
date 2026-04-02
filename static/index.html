@@ -109,7 +109,7 @@
     .status-dot.busy    { background: var(--accent2); box-shadow: 0 0 6px var(--glow); }
     .status-dot.offline { background: var(--red); }
 
-    .btn-clear {
+    .btn-clear, .btn-tts {
       background: none;
       border: 1px solid var(--border);
       color: var(--text-dim);
@@ -122,6 +122,8 @@
       transition: border-color 0.2s, color 0.2s;
     }
     .btn-clear:hover { border-color: var(--accent); color: var(--accent2); }
+    .btn-tts.active { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 8px var(--glow); }
+    .btn-tts:hover  { border-color: var(--accent); color: var(--accent2); }
 
     /* ── Main layout ── */
     .main {
@@ -351,6 +353,7 @@
       <div class="status-dot" id="statusDot"></div>
       <span id="statusText">CHECKING</span>
     </div>
+    <button class="btn-tts" id="ttsToggle" onclick="toggleTTS()">TTS OFF</button>
     <button class="btn-clear" onclick="clearSession()">CLEAR SESSION</button>
   </div>
 </header>
@@ -389,7 +392,33 @@
 <script>
   const SESSION_ID = 'web-' + Math.random().toString(36).slice(2, 7);
   let isStreaming = false;
+  let ttsEnabled = false;
+  let currentAudio = null;
   const queuedJobs = {};
+
+  function toggleTTS() {
+    ttsEnabled = !ttsEnabled;
+    const btn = document.getElementById('ttsToggle');
+    btn.textContent = ttsEnabled ? 'TTS ON' : 'TTS OFF';
+    btn.classList.toggle('active', ttsEnabled);
+  }
+
+  async function speakText(text) {
+    if (!ttsEnabled || !text.trim()) return;
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    try {
+      const r = await fetch('/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      currentAudio = new Audio(url);
+      currentAudio.play();
+      currentAudio.onended = () => URL.revokeObjectURL(url);
+    } catch(e) { console.warn('TTS error:', e); }
+  }
 
   document.getElementById('statSession').textContent = SESSION_ID.slice(4).toUpperCase();
 
@@ -468,6 +497,7 @@
       }
 
       updateMessage(aiDiv, full, true);
+      speakText(full);
     } catch (e) {
       updateMessage(aiDiv, 'Connection error: ' + e.message, true);
     }
