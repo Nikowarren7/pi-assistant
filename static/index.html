@@ -336,16 +336,16 @@
 
     .ctrl-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 18px; height: 72px; cursor: pointer;
+      padding: 0 20px; height: 144px; cursor: pointer;
       user-select: none; -webkit-user-select: none;
     }
-    .ctrl-left { display: flex; align-items: center; gap: 14px; }
-    .ctrl-icon { font-size: 28px; line-height: 1; }
-    .ctrl-name { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+    .ctrl-left { display: flex; align-items: center; gap: 18px; }
+    .ctrl-icon { font-size: 44px; line-height: 1; }
+    .ctrl-name { font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
     .ctrl-status-badge {
-      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
       letter-spacing: 2px; text-transform: uppercase;
-      padding: 3px 8px; border-radius: 20px; border: 1px solid;
+      padding: 4px 10px; border-radius: 20px; border: 1px solid;
       transition: all .3s;
     }
     .ctrl-status-badge.off     { color: var(--text-dim); border-color: var(--border); background: rgba(255,255,255,0.03); }
@@ -364,7 +364,7 @@
       border-top: 0px solid var(--border);
     }
     .ctrl-card.open .ctrl-expanded {
-      max-height: 500px;
+      max-height: 2000px;
       border-top-width: 1px;
     }
     .ctrl-expanded-inner { padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 20px; }
@@ -406,7 +406,7 @@
 
     /* ── Control card sub-elements ── */
     .ctrl-secondary {
-      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
       letter-spacing: 1px; text-transform: uppercase; color: var(--accent2);
     }
 
