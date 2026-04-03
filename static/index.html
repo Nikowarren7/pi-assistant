@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PI" />
-  <meta name="theme-color" content="#141210" />
+  <meta name="theme-color" content="#020812" />
   <title>PI ASSISTANT</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
@@ -15,35 +15,33 @@
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
     :root {
-      --bg:        #141210;
-      --surface:   #1c1914;
-      --panel:     #22201a;
-      --border:    #3a3228;
-      --accent:    #c4722a;
-      --accent2:   #e08840;
-      --glow:      #c4722a55;
-      --glow2:     #c4722a22;
-      --text:      #d4c4a8;
-      --text-dim:  #7a6a58;
-      --ai-msg:    #191610;
-      --user-msg:  #1f1c16;
-      --scratch:   #2a1a08;
-      --red:       #8b3020;
-      --green:     #5a9a48;
-      --blue:      #4a7a9b;
-      --blue2:     #5a9abb;
-      --blue-glow: #4a7a9b55;
+      --bg:        #020812;
+      --surface:   #040f1e;
+      --panel:     #061525;
+      --border:    #0d2640;
+      --accent:    #0088ff;
+      --accent2:   #40b4ff;
+      --glow:      #0088ff66;
+      --glow2:     #0088ff22;
+      --text:      #eef2f8;
+      --text-dim:  #3a6080;
+      --ai-msg:    #040e1c;
+      --user-msg:  #061220;
+      --glass-bg:  rgba(6,20,50,0.6);
+      --glass-border: rgba(0,136,255,0.2);
+      --red:       #ff4040;
+      --green:     #40e080;
       --safe-top:  env(safe-area-inset-top, 0px);
       --safe-bot:  env(safe-area-inset-bottom, 0px);
     }
 
-    /* Claude mode overrides accent to blue */
     body.claude-mode {
-      --accent:  #4a7a9b;
-      --accent2: #5a9abb;
-      --glow:    #4a7a9b55;
-      --glow2:   #4a7a9b22;
-      --scratch: #081a2a;
+      --accent:  #8040ff;
+      --accent2: #b080ff;
+      --glow:    #8040ff66;
+      --glow2:   #8040ff22;
+      --glass-bg: rgba(16,8,40,0.6);
+      --glass-border: rgba(128,64,255,0.2);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -57,7 +55,6 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: --accent .3s;
     }
 
     /* ── Header ── */
@@ -66,7 +63,9 @@
       padding: 10px 16px;
       padding-top: calc(10px + var(--safe-top));
       border-bottom: 1px solid var(--border);
-      background: var(--surface);
+      background: rgba(4,15,30,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       flex-shrink: 0; position: relative; z-index: 10;
     }
 
@@ -77,62 +76,60 @@
       border: 2px solid var(--accent);
       display: flex; align-items: center; justify-content: center;
       clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-      background: var(--scratch);
-      box-shadow: 0 0 10px var(--glow);
-      transition: border-color .3s, box-shadow .3s, background .3s;
+      background: var(--glow2);
+      box-shadow: 0 0 14px var(--glow);
+      transition: border-color .3s, box-shadow .3s;
     }
     .logo-mark svg { width: 16px; height: 16px; fill: var(--accent2); transition: fill .3s; }
 
-    .title-block h1 {
-      font-size: 15px; font-weight: 700; letter-spacing: 3px;
-      color: var(--accent2); text-transform: uppercase; transition: color .3s;
-    }
-    .title-block p { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+    .title-block h1 { font-size: 15px; font-weight: 700; letter-spacing: 3px; color: var(--accent2); text-transform: uppercase; transition: color .3s; }
+    .title-block p  { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
 
     .header-right { display: flex; align-items: center; gap: 10px; }
 
-    .status-pill {
-      display: flex; align-items: center; gap: 6px;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 10px; color: var(--text-dim);
-    }
-    .status-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: #444;
-      transition: background .3s, box-shadow .3s; flex-shrink: 0;
-    }
-    .status-dot.online  { background: var(--green); box-shadow: 0 0 6px #5a9a4888; }
+    .status-pill { display: flex; align-items: center; gap: 6px; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); }
+    .status-dot  { width: 7px; height: 7px; border-radius: 50%; background: #333; transition: background .3s, box-shadow .3s; flex-shrink: 0; }
+    .status-dot.online  { background: var(--green); box-shadow: 0 0 6px #40e08088; }
     .status-dot.busy    { background: var(--accent2); box-shadow: 0 0 6px var(--glow); animation: pulse 1s infinite; }
     .status-dot.offline { background: var(--red); }
     #statusText { display: none; }
 
-    /* ── Layout ── */
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: rgba(4,15,30,0.9); flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px 4px; background: none; border: none;
+      color: var(--text-dim); font-family: 'Rajdhani', sans-serif;
+      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+    /* ── Views ── */
+    .view { display: none; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
+    .view.active { display: flex; }
+
     .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
     .sidebar { display: none; }
 
     /* ── Mode banner ── */
     .mode-banner {
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      padding: 6px 16px;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0;
+      background: rgba(6,20,50,0.7); border-bottom: 1px solid var(--border);
+      padding: 5px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
     }
     .mode-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-      color: var(--accent2); display: flex; align-items: center; gap: 8px;
-      transition: color .3s;
+      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--accent2);
+      display: flex; align-items: center; gap: 8px; transition: color .3s;
     }
-    .mode-label::before {
-      content: ''; width: 6px; height: 6px;
-      background: var(--accent2); border-radius: 50%;
-      box-shadow: 0 0 6px var(--glow);
-      transition: background .3s, box-shadow .3s;
-    }
+    .mode-label::before { content: ''; width: 5px; height: 5px; background: var(--accent2); border-radius: 50%; box-shadow: 0 0 6px var(--glow); transition: background .3s; }
     .mode-sublabel { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; font-family: 'Share Tech Mono', monospace; }
 
     /* ── Chat ── */
-    .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; position: relative; }
 
     .messages {
       flex: 1; overflow-y: auto; padding: 12px;
@@ -142,32 +139,110 @@
     }
 
     .msg { display: flex; flex-direction: column; gap: 3px; width: 100%; }
-    .msg-meta {
-      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--text-dim); font-family: 'Share Tech Mono', monospace; padding: 0 2px;
-    }
-    .msg.user .msg-meta { color: var(--accent); transition: color .3s; }
+    .msg-meta { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; padding: 0 2px; }
+    .msg.user .msg-meta { color: var(--accent2); transition: color .3s; }
     .msg-bubble {
       padding: 10px 14px; border: 1px solid var(--border);
-      line-height: 1.55; font-size: 15px;
-      white-space: pre-wrap; word-break: break-word; border-radius: 2px;
+      line-height: 1.55; font-size: 15px; white-space: pre-wrap; word-break: break-word; border-radius: 4px;
     }
-    .msg.user .msg-bubble { background: var(--user-msg); border-color: #302c24; }
+    .msg.user .msg-bubble { background: var(--user-msg); border-color: #0d2240; }
     .msg.ai   .msg-bubble { background: var(--ai-msg); border-left: 2px solid var(--accent); transition: border-color .3s; }
-    .msg.ai.streaming .msg-bubble::after { content: '▋'; color: var(--accent2); animation: blink .7s step-end infinite; }
+    .msg.ai.streaming .msg-bubble::after { content: ''; }
+
+    /* ── BD-1 ── */
+    .bd1-container {
+      position: absolute; bottom: 80px; left: 12px;
+      display: flex; align-items: flex-end; gap: 8px;
+      z-index: 20; pointer-events: none;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity .3s ease, transform .3s ease;
+    }
+    .bd1-container.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes bd1-appear { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+    .bd1-svg { width: 56px; height: 72px; flex-shrink: 0; }
+
+    .bd1-body-shell { fill: #1a3a5c; stroke: var(--accent); stroke-width: 1.5; }
+    .bd1-head-shell  { fill: #0d2640; stroke: var(--accent2); stroke-width: 1.5; }
+    .bd1-visor       { fill: var(--accent2); opacity: 0.9; }
+    .bd1-eye-glow    { fill: #ffffff; opacity: 0.7; }
+    .bd1-antenna     { stroke: var(--accent2); stroke-width: 1.5; fill: none; }
+    .bd1-antenna-tip { fill: var(--accent2); filter: drop-shadow(0 0 3px var(--accent2)); }
+    .bd1-leg         { fill: #1a3a5c; stroke: var(--accent); stroke-width: 1; }
+    .bd1-detail      { fill: none; stroke: var(--accent); stroke-width: 0.8; opacity: 0.5; }
+
+    .bd1-head-group {
+      transform-origin: 28px 32px;
+      animation: bd1-talk 1.4s ease-in-out infinite;
+    }
+    .bd1-container.visible .bd1-antenna-tip { animation: bd1-ping .8s ease-in-out infinite; }
+
+    @keyframes bd1-talk {
+      0%   { transform: rotate(0deg); }
+      12%  { transform: rotate(-14deg); }
+      28%  { transform: rotate(10deg); }
+      44%  { transform: rotate(-18deg); }
+      58%  { transform: rotate(12deg); }
+      72%  { transform: rotate(-8deg); }
+      86%  { transform: rotate(6deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes bd1-ping {
+      0%,100% { opacity:1; r: 3; }
+      50%     { opacity:0.3; r: 5; }
+    }
+
+    /* speech bubble */
+    .bd1-bubble {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px 12px 12px 4px;
+      padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      max-width: 240px; min-width: 70px;
+    }
+    .bd1-bubble-dots { display: flex; align-items: center; gap: 4px; }
+    .bd1-bubble-text {
+      display: none; font-size: 12px; line-height: 1.45;
+      color: var(--text); max-height: 150px; overflow-y: auto;
+      scrollbar-width: none; word-break: break-word;
+    }
+    .bd1-bubble-text::-webkit-scrollbar { display: none; }
+    .bd1-container.talking .bd1-bubble-dots { display: none; }
+    .bd1-container.talking .bd1-bubble-text { display: block; }
+
+    .bd1-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent2);
+      animation: bd1-dot-bounce .9s ease-in-out infinite;
+    }
+    .bd1-dot:nth-child(2) { animation-delay: .15s; }
+    .bd1-dot:nth-child(3) { animation-delay: .3s; }
+    @keyframes bd1-dot-bounce { 0%,80%,100% { transform:scale(0.7); opacity:.4; } 40% { transform:scale(1.2); opacity:1; } }
+
+    /* corner BD-1 decorations */
+    .bd1-corner {
+      position: absolute; bottom: 10px; right: 10px;
+      width: 36px; height: 46px; opacity: 0.3;
+      pointer-events: none; z-index: 5;
+      transition: opacity .3s;
+    }
+    .bd1-corner.active { opacity: 0.8; }
+    .bd1-corner .bd1-head-group { animation: none; }
+    .bd1-corner.excited .bd1-head-group { animation: bd1-talk .6s ease-in-out 3; }
 
     /* ── Input ── */
     .input-bar {
-      border-top: 1px solid var(--border); background: var(--surface);
-      padding: 10px 12px;
-      padding-bottom: calc(10px + var(--safe-bot));
+      border-top: 1px solid var(--border); background: rgba(4,15,30,0.9);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      padding: 10px 12px; padding-bottom: calc(10px + var(--safe-bot));
       display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
     }
-    .input-wrap {
-      flex: 1; border: 1px solid var(--border); background: var(--panel);
-      display: flex; align-items: flex-end; transition: border-color .2s; border-radius: 2px;
-    }
-    .input-wrap:focus-within { border-color: var(--accent); }
+    .input-wrap { flex: 1; border: 1px solid var(--border); background: var(--panel); display: flex; align-items: flex-end; transition: border-color .2s; border-radius: 4px; }
+    .input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 12px var(--glow2); }
     textarea {
       flex: 1; background: none; border: none; outline: none;
       color: var(--text); font-family: 'Rajdhani', sans-serif;
@@ -180,123 +255,255 @@
       font-family: 'Rajdhani', sans-serif; font-weight: 700;
       font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
       padding: 0 18px; cursor: pointer; height: 44px; flex-shrink: 0;
-      transition: background .2s, box-shadow .2s; border-radius: 2px; min-width: 64px;
+      transition: background .2s, box-shadow .2s; border-radius: 4px; min-width: 64px;
+      box-shadow: 0 0 16px var(--glow2);
     }
-    .send-btn:active { background: var(--accent2); box-shadow: 0 0 16px var(--glow); }
-    .send-btn:disabled { opacity: .4; }
+    .send-btn:active { background: var(--accent2); box-shadow: 0 0 24px var(--glow); }
+    .send-btn:disabled { opacity: .4; box-shadow: none; }
 
-    /* ── Bottom toolbar ── */
+    /* ── Toolbar ── */
     .toolbar {
       display: flex; align-items: stretch; justify-content: space-around;
-      border-top: 1px solid var(--border); background: var(--surface);
+      border-top: 1px solid var(--border);
+      background: rgba(4,15,30,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       padding: 6px 12px; padding-bottom: calc(6px + var(--safe-bot));
       flex-shrink: 0; gap: 6px;
     }
     .tool-btn {
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-      background: none; border: 1px solid var(--border);
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       color: var(--text-dim); font-family: 'Rajdhani', sans-serif;
       font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
       padding: 8px 10px; cursor: pointer; flex: 1; min-height: 50px;
       transition: border-color .2s, color .2s, box-shadow .2s, background .2s;
-      border-radius: 2px;
+      border-radius: 10px;
     }
     .tool-btn svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
-    .tool-btn:active { border-color: var(--accent); color: var(--accent2); }
-    .tool-btn.active  { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 8px var(--glow); background: var(--glow2); }
+    .tool-btn:active { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 12px var(--glow); }
+    .tool-btn.active  { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 12px var(--glow); background: var(--glow2); }
 
-    /* mode toggle special */
     .mode-toggle-btn { position: relative; }
-    .mode-toggle-btn .mode-pip {
-      position: absolute; top: 6px; right: 6px;
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--accent2); box-shadow: 0 0 4px var(--glow);
-      transition: background .3s;
+    .mode-pip { position: absolute; top: 6px; right: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 4px var(--glow); }
+
+    /* ════════════════ TERMINAL TAB ════════════════ */
+    .term-container { flex: 1; overflow: hidden; padding: 8px; background: var(--bg); position: relative; }
+    .xterm { height: 100%; }
+    .quick-cmds {
+      border-top: 1px solid var(--border); background: rgba(4,15,30,0.9);
+      padding: 8px 10px; padding-bottom: calc(8px + var(--safe-bot));
+      display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0;
+    }
+    .quick-cmd {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      color: var(--text-dim); font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; padding: 6px 12px; cursor: pointer;
+      transition: border-color .2s, color .2s, box-shadow .2s; border-radius: 8px;
+      letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .quick-cmd:active { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 10px var(--glow); }
+
+    /* ════════════════ CONTROL CENTER ════════════════ */
+    .controls-view {
+      flex: 1; overflow-y: auto; padding: 14px 12px;
+      padding-bottom: calc(14px + var(--safe-bot));
+      display: flex; flex-direction: column; gap: 10px;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      position: relative;
+    }
+    .controls-view::before {
+      content: 'CONTROL CENTER';
+      display: block; font-size: 9px; letter-spacing: 5px;
+      color: var(--text-dim); text-transform: uppercase;
+      font-family: 'Share Tech Mono', monospace;
+      padding-bottom: 10px; text-align: center;
     }
 
-    /* ── Config panel — slides up ── */
-    .cfg-overlay {
-      position: fixed; inset: 0; background: #00000077;
-      z-index: 100; opacity: 0; pointer-events: none; transition: opacity .3s;
+    /* Glass card */
+    .ctrl-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,136,255,0.12);
+      overflow: hidden;
+      transition: box-shadow .3s;
     }
+    .ctrl-card.open { box-shadow: 0 8px 40px rgba(0,136,255,0.15), inset 0 1px 0 rgba(0,136,255,0.2); }
+
+    .ctrl-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px; height: 72px; cursor: pointer;
+      user-select: none; -webkit-user-select: none;
+    }
+    .ctrl-left { display: flex; align-items: center; gap: 14px; }
+    .ctrl-icon { font-size: 28px; line-height: 1; }
+    .ctrl-name { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+    .ctrl-status-badge {
+      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 20px; border: 1px solid;
+      transition: all .3s;
+    }
+    .ctrl-status-badge.off     { color: var(--text-dim); border-color: var(--border); background: rgba(255,255,255,0.03); }
+    .ctrl-status-badge.on      { color: var(--green); border-color: var(--green); background: rgba(64,224,128,0.1); box-shadow: 0 0 8px rgba(64,224,128,0.2); }
+    .ctrl-status-badge.running { color: var(--accent2); border-color: var(--accent); background: var(--glow2); box-shadow: 0 0 8px var(--glow); animation: pulse 1.5s infinite; }
+
+    .ctrl-chevron {
+      color: var(--text-dim); font-size: 12px; transition: transform .3s ease;
+    }
+    .ctrl-card.open .ctrl-chevron { transform: rotate(180deg); color: var(--accent2); }
+
+    /* Expanded panel */
+    .ctrl-expanded {
+      max-height: 0; overflow: hidden;
+      transition: max-height .4s cubic-bezier(.4,0,.2,1), padding .3s;
+      border-top: 0px solid var(--border);
+    }
+    .ctrl-card.open .ctrl-expanded {
+      max-height: 500px;
+      border-top-width: 1px;
+    }
+    .ctrl-expanded-inner { padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Toggle row */
+    .ctrl-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+    .ctrl-toggle-label { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+
+    .toggle-switch {
+      position: relative; width: 56px; height: 30px;
+      background: var(--border); border-radius: 15px;
+      cursor: pointer; transition: background .3s, box-shadow .3s;
+      border: 1px solid var(--glass-border);
+    }
+    .toggle-switch.on { background: var(--accent); box-shadow: 0 0 16px var(--glow); }
+    .toggle-knob {
+      position: absolute; top: 3px; left: 3px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--text); transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .toggle-switch.on .toggle-knob { transform: translateX(26px); background: #fff; }
+
+    /* Pot graphic */
+    .pot-section { display: flex; flex-direction: column; gap: 10px; }
+    .pot-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; display: flex; justify-content: space-between; }
+    .pot-graphic {
+      position: relative; height: 80px;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .pot-svg { width: 70px; height: 80px; }
+    .pot-fill-rect { transition: height .5s ease, y .5s ease; }
+    .pot-pct {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold;
+      color: var(--text); text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+    }
+
+    /* ── Control card sub-elements ── */
+    .ctrl-secondary {
+      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--accent2);
+    }
+
+    .ctrl-progress { display: flex; flex-direction: column; gap: 8px; }
+    .ctrl-progress-label {
+      display: flex; justify-content: space-between;
+      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase;
+    }
+    .ctrl-progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .ctrl-progress-fill {
+      height: 100%; background: var(--accent); border-radius: 3px;
+      transition: width .6s ease; box-shadow: 0 0 8px var(--glow);
+    }
+    .ctrl-progress-fill.green { background: var(--green); box-shadow: 0 0 8px rgba(64,224,128,0.4); }
+    .ctrl-progress-fill.red   { background: var(--red);   box-shadow: 0 0 8px rgba(255,64,64,0.4); }
+
+    .ctrl-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ctrl-info-cell {
+      background: rgba(0,136,255,0.05); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .ctrl-info-cell-label {
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); font-family: 'Share Tech Mono', monospace;
+    }
+    .ctrl-info-cell-value {
+      font-family: 'Share Tech Mono', monospace; font-size: 18px;
+      font-weight: bold; color: var(--accent2);
+    }
+
+    .ctrl-btn {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      color: var(--text-dim); font-family: 'Rajdhani', sans-serif;
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 11px 14px; cursor: pointer; border-radius: 10px;
+      transition: border-color .2s, color .2s, box-shadow .2s;
+      width: 100%; text-align: left;
+    }
+    .ctrl-btn:active { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 10px var(--glow); }
+    .ctrl-btn-row { display: flex; gap: 8px; }
+    .ctrl-btn-row .ctrl-btn { flex: 1; text-align: center; }
+
+    /* ── Config panel ── */
+    .cfg-overlay { position: fixed; inset: 0; background: #00000077; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .3s; }
     .cfg-overlay.open { opacity: 1; pointer-events: all; }
 
     .cfg-panel {
       position: fixed; bottom: -100%; left: 0; right: 0; max-height: 88dvh;
-      background: var(--surface); border-top: 1px solid var(--accent);
-      box-shadow: 0 -8px 40px #00000099;
+      background: rgba(4,15,30,0.92);
+      backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+      border-top: 1px solid var(--accent);
+      box-shadow: 0 -8px 60px rgba(0,136,255,0.2);
       z-index: 101; display: flex; flex-direction: column;
       transition: bottom .35s cubic-bezier(.4,0,.2,1);
-      border-radius: 12px 12px 0 0; overflow: hidden;
+      border-radius: 20px 20px 0 0; overflow: hidden;
     }
     .cfg-panel.open { bottom: 0; }
 
     .cfg-drag { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 10px auto 0; }
-
     .cfg-header {
       padding: 12px 20px; border-bottom: 1px solid var(--border);
-      background: linear-gradient(180deg, #221a10 0%, var(--surface) 100%);
-      flex-shrink: 0; position: relative;
+      background: rgba(0,136,255,0.05); flex-shrink: 0; position: relative;
     }
-    .cfg-header::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
-      transition: background .3s;
-    }
-    .cfg-title { font-size: 13px; font-weight: 700; letter-spacing: 4px; color: var(--accent2); text-transform: uppercase; transition: color .3s; }
-    .cfg-subtitle { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; margin-top: 2px; }
-    .cfg-close {
-      position: absolute; top: 12px; right: 16px;
-      background: none; border: 1px solid var(--border);
-      color: var(--text-dim); font-size: 16px; width: 30px; height: 30px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
+    .cfg-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg,transparent,var(--accent2),transparent); }
+    .cfg-title   { font-size: 13px; font-weight: 700; letter-spacing: 4px; color: var(--accent2); text-transform: uppercase; }
+    .cfg-subtitle{ font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; margin-top: 2px; }
+    .cfg-close   { position: absolute; top: 12px; right: 16px; background: none; border: 1px solid var(--border); color: var(--text-dim); font-size: 16px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
 
-    .cfg-body {
-      flex: 1; overflow-y: auto; padding: 20px;
-      display: flex; flex-direction: column; gap: 24px;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(20px + var(--safe-bot));
-    }
+    .cfg-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 24px; -webkit-overflow-scrolling: touch; padding-bottom: calc(20px + var(--safe-bot)); }
 
-    .cfg-section-title {
-      font-size: 10px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase;
-      margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 8px; transition: color .3s;
-    }
-    .cfg-section-title::before {
-      content: ''; width: 3px; height: 12px; background: var(--accent2);
-      box-shadow: 0 0 6px var(--glow); flex-shrink: 0; transition: background .3s, box-shadow .3s;
-    }
+    .cfg-section-title { font-size: 10px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .cfg-section-title::before { content: ''; width: 3px; height: 12px; background: var(--accent2); box-shadow: 0 0 6px var(--glow); flex-shrink: 0; }
 
     .cfg-row { display: flex; flex-direction: column; gap: 8px; }
     .cfg-row-label { display: flex; justify-content: space-between; align-items: center; }
     .cfg-row-label span:first-child { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
-    .cfg-val { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--accent2); min-width: 40px; text-align: right; transition: color .3s; }
+    .cfg-val { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--accent2); min-width: 40px; text-align: right; }
 
-    input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--border); outline: none; cursor: pointer; }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 22px; height: 22px;
-      background: var(--accent2); border-radius: 0;
-      box-shadow: 0 0 8px var(--glow);
-      clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%);
-      transition: background .3s;
-    }
-    input[type=range]::-moz-range-thumb { width: 22px; height: 22px; background: var(--accent2); border: none; border-radius: 0; }
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--border); outline: none; cursor: pointer; border-radius: 2px; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: var(--accent2); border-radius: 50%; box-shadow: 0 0 10px var(--glow); }
+    input[type=range]::-moz-range-thumb { width: 22px; height: 22px; background: var(--accent2); border: none; border-radius: 50%; }
     .range-hints { display: flex; justify-content: space-between; margin-top: 2px; }
     .range-hints span { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
 
     .voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .voice-btn {
-      background: var(--panel); border: 1px solid var(--border);
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       color: var(--text-dim); font-family: 'Share Tech Mono', monospace;
       font-size: 10px; padding: 12px 10px; cursor: pointer;
       text-align: left; line-height: 1.4; position: relative; overflow: hidden;
       transition: border-color .2s, color .2s, background .2s; min-height: 52px;
+      border-radius: 10px;
     }
-    .voice-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: transparent; transition: background .2s; }
-    .voice-btn.selected { border-color: var(--accent2); color: var(--accent2); background: var(--scratch); box-shadow: inset 0 0 12px var(--glow2); }
-    .voice-btn.selected::before { background: var(--accent2); box-shadow: 0 0 6px var(--glow); }
+    .voice-btn.selected { border-color: var(--accent2); color: var(--accent2); background: var(--glow2); box-shadow: 0 0 16px var(--glow2); }
     .voice-tag { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; display: block; margin-top: 3px; }
     .voice-btn.selected .voice-tag { color: var(--accent); }
 
@@ -305,57 +512,19 @@
       font-family: 'Rajdhani', sans-serif; font-weight: 700;
       font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
       padding: 16px; cursor: pointer; width: 100%;
-      transition: background .2s, box-shadow .2s; min-height: 52px;
+      transition: background .2s, box-shadow .2s; min-height: 52px; border-radius: 10px;
+      box-shadow: 0 4px 20px var(--glow2);
     }
-    .cfg-apply:active { background: var(--accent2); box-shadow: 0 0 20px var(--glow); }
+    .cfg-apply:active { background: var(--accent2); box-shadow: 0 4px 30px var(--glow); }
 
-    .cfg-feedback {
-      font-family: 'Share Tech Mono', monospace; font-size: 11px;
-      color: var(--green); letter-spacing: 2px; text-align: center; min-height: 18px; transition: opacity .3s;
-    }
+    .cfg-feedback { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--green); letter-spacing: 2px; text-align: center; min-height: 18px; transition: opacity .3s; }
 
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
-    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+    @keyframes blink  { 50% { opacity:0; } }
 
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); }
-
-    /* ── Tab switcher ── */
-    .tab-bar {
-      display: flex; border-bottom: 1px solid var(--border);
-      background: var(--surface); flex-shrink: 0;
-    }
-    .tab-btn {
-      flex: 1; padding: 10px; background: none; border: none;
-      color: var(--text-dim); font-family: 'Rajdhani', sans-serif;
-      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-      cursor: pointer; border-bottom: 2px solid transparent;
-      transition: color .2s, border-color .2s;
-    }
-    .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
-
-    /* ── Views ── */
-    .view { display: none; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
-    .view.active { display: flex; }
-
-    /* ── Terminal ── */
-    .term-container { flex: 1; overflow: hidden; padding: 8px; background: var(--bg); }
-    .xterm { height: 100%; }
-
-    .quick-cmds {
-      border-top: 1px solid var(--border); background: var(--surface);
-      padding: 8px 10px; padding-bottom: calc(8px + var(--safe-bot));
-      display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0;
-    }
-    .quick-cmd {
-      background: var(--panel); border: 1px solid var(--border);
-      color: var(--text-dim); font-family: 'Share Tech Mono', monospace;
-      font-size: 10px; padding: 6px 10px; cursor: pointer;
-      transition: border-color .2s, color .2s; border-radius: 2px;
-      letter-spacing: 0.5px; white-space: nowrap;
-    }
-    .quick-cmd:active { border-color: var(--accent); color: var(--accent2); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
     /* ════════════════ DESKTOP ════════════════ */
     @media (min-width: 700px) {
@@ -364,18 +533,19 @@
       header      { padding: 10px 20px; }
 
       .hdr-btn {
-        background: none; border: 1px solid var(--border);
+        background: var(--glass-bg); border: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         color: var(--text-dim); font-family: 'Rajdhani', sans-serif;
         font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
         padding: 5px 14px; cursor: pointer;
-        transition: border-color .2s, color .2s, box-shadow .2s;
+        transition: border-color .2s, color .2s, box-shadow .2s; border-radius: 6px;
       }
-      .hdr-btn:hover  { border-color: var(--accent); color: var(--accent2); }
-      .hdr-btn.active { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 8px var(--glow); }
+      .hdr-btn:hover  { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 10px var(--glow2); }
+      .hdr-btn.active { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 12px var(--glow); background: var(--glow2); }
 
       .sidebar {
         display: flex; flex-direction: column; width: 200px; flex-shrink: 0;
-        border-right: 1px solid var(--border); background: var(--surface); padding: 16px 0; gap: 4px;
+        border-right: 1px solid var(--border); background: rgba(4,15,30,0.8); padding: 16px 0; gap: 4px;
       }
       .sidebar-label { font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; padding: 0 16px 8px; }
       .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; font-size: 12px; }
@@ -383,11 +553,7 @@
       .stat-row span:last-child  { font-family: 'Share Tech Mono', monospace; color: var(--accent2); font-size: 12px; }
       .divider { border: none; border-top: 1px solid var(--border); margin: 10px 16px; }
       .queue-list { flex: 1; overflow-y: auto; padding: 0 8px; }
-      .queue-item {
-        padding: 8px; font-size: 11px; font-family: 'Share Tech Mono', monospace;
-        color: var(--text-dim); border-left: 2px solid transparent;
-        margin-bottom: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
+      .queue-item { padding: 8px; font-size: 11px; font-family: 'Share Tech Mono', monospace; color: var(--text-dim); border-left: 2px solid transparent; margin-bottom: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .queue-item.done       { border-color: var(--green); color: var(--text); }
       .queue-item.processing { border-color: var(--accent2); color: var(--accent2); animation: pulse 1s infinite; }
       .queue-item.error      { border-color: var(--red); }
@@ -396,14 +562,16 @@
       .input-bar { padding: 14px 20px; }
 
       .cfg-panel {
-        top: 0; bottom: auto; left: auto; right: -480px;
-        width: 440px; max-height: 100%;
+        top: 0; bottom: auto; left: auto; right: -480px; width: 440px; max-height: 100%;
         border-top: none; border-left: 1px solid var(--accent);
-        box-shadow: -8px 0 40px #00000099;
+        box-shadow: -8px 0 60px rgba(0,136,255,0.15);
         border-radius: 0; transition: right .35s cubic-bezier(.4,0,.2,1);
       }
       .cfg-panel.open { right: 0; }
       .cfg-drag { display: none; }
+
+      .controls-view { padding: 20px; gap: 12px; }
+      .ctrl-card { max-width: 600px; margin: 0 auto; width: 100%; }
     }
   </style>
 </head>
@@ -434,46 +602,96 @@
 
 <!-- ── Tab bar ── -->
 <div class="tab-bar">
-  <button class="tab-btn active" id="tabChat" onclick="switchTab('chat')">CHAT</button>
-  <button class="tab-btn" id="tabTerm" onclick="switchTab('term')">TERMINAL</button>
+  <button class="tab-btn active" id="tabChat"    onclick="switchTab('chat')">CHAT</button>
+  <button class="tab-btn"        id="tabTerm"    onclick="switchTab('term')">TERMINAL</button>
+  <button class="tab-btn"        id="tabControl" onclick="switchTab('control')">CONTROLS</button>
 </div>
 
-<!-- ── Chat view ── -->
+<!-- ══════════════ CHAT VIEW ══════════════ -->
 <div class="view active" id="viewChat">
-<div class="mode-banner">
-  <div class="mode-label" id="modeBannerLabel">LOCAL · QWEN 2.5 14B</div>
-  <div class="mode-sublabel" id="modeBannerSub">RUNNING ON LAPTOP VIA ETHERNET</div>
-</div>
-
-<!-- ── Main ── -->
-<div class="main">
-  <div class="sidebar">
-    <div class="sidebar-label">System</div>
-    <div class="stat-row"><span>Mode</span><span id="statMode">LOCAL</span></div>
-    <div class="stat-row"><span>Model</span><span id="statModel">—</span></div>
-    <div class="stat-row"><span>Session</span><span id="statSession">—</span></div>
-    <div class="stat-row"><span>Queued</span><span id="statQueued">0</span></div>
-    <hr class="divider" />
-    <div class="sidebar-label">Queue</div>
-    <div class="queue-list" id="queueList"></div>
+  <div class="mode-banner">
+    <div class="mode-label" id="modeBannerLabel">LOCAL · QWEN 2.5 14B</div>
+    <div class="mode-sublabel" id="modeBannerSub">RUNNING ON LAPTOP VIA ETHERNET</div>
   </div>
+  <div class="main">
+    <div class="sidebar">
+      <div class="sidebar-label">System</div>
+      <div class="stat-row"><span>Mode</span><span id="statMode">LOCAL</span></div>
+      <div class="stat-row"><span>Model</span><span id="statModel">—</span></div>
+      <div class="stat-row"><span>Session</span><span id="statSession">—</span></div>
+      <div class="stat-row"><span>Queued</span><span id="statQueued">0</span></div>
+      <hr class="divider" />
+      <div class="sidebar-label">Queue</div>
+      <div class="queue-list" id="queueList"></div>
+    </div>
+    <div class="chat-area">
+      <div class="messages" id="messages"></div>
 
-  <div class="chat-area">
-    <div class="messages" id="messages"></div>
-    <div class="input-bar">
-      <div class="input-wrap">
-        <textarea id="input" rows="1" placeholder="Transmit message..."
-          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <!-- BD-1 typing indicator -->
+      <div class="bd1-container" id="bd1Indicator">
+        <svg class="bd1-svg" viewBox="0 0 56 76" xmlns="http://www.w3.org/2000/svg">
+          <!-- Legs -->
+          <rect class="bd1-leg" x="13" y="58" width="9" height="14" rx="4"/>
+          <rect class="bd1-leg" x="34" y="58" width="9" height="14" rx="4"/>
+          <!-- Body -->
+          <rect class="bd1-body-shell" x="10" y="36" width="36" height="26" rx="10"/>
+          <rect class="bd1-detail" x="16" y="42" width="10" height="6" rx="2"/>
+          <rect class="bd1-detail" x="30" y="42" width="10" height="6" rx="2"/>
+          <line class="bd1-detail" x1="28" y1="50" x2="28" y2="58"/>
+          <!-- Head group (rotates) -->
+          <g class="bd1-head-group">
+            <!-- Antenna -->
+            <line class="bd1-antenna" x1="28" y1="18" x2="28" y2="8"/>
+            <circle class="bd1-antenna-tip" cx="28" cy="6" r="3"/>
+            <!-- Head -->
+            <rect class="bd1-head-shell" x="12" y="18" width="32" height="22" rx="8"/>
+            <!-- Visor -->
+            <rect class="bd1-visor" x="15" y="23" width="26" height="11" rx="4"/>
+            <!-- Eye highlight -->
+            <rect class="bd1-eye-glow" x="17" y="25" width="10" height="7" rx="2"/>
+            <!-- Ear details -->
+            <rect class="bd1-detail" x="10" y="22" width="4" height="8" rx="2"/>
+            <rect class="bd1-detail" x="42" y="22" width="4" height="8" rx="2"/>
+          </g>
+        </svg>
+        <div class="bd1-bubble">
+          <div class="bd1-bubble-dots">
+            <div class="bd1-dot"></div>
+            <div class="bd1-dot"></div>
+            <div class="bd1-dot"></div>
+          </div>
+          <div class="bd1-bubble-text" id="bd1BubbleText"></div>
+        </div>
       </div>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()">SEND</button>
+
+      <div class="input-bar">
+        <div class="input-wrap">
+          <textarea id="input" rows="1" placeholder="Transmit message..."
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">SEND</button>
+      </div>
     </div>
   </div>
 </div>
-</div><!-- end viewChat -->
 
-<!-- ── Terminal view ── -->
+<!-- ══════════════ TERMINAL VIEW ══════════════ -->
 <div class="view" id="viewTerm">
-  <div class="term-container" id="termContainer"></div>
+  <div class="term-container" id="termContainer">
+    <!-- corner BD-1 -->
+    <svg class="bd1-corner" id="bd1TermCorner" viewBox="0 0 56 76" xmlns="http://www.w3.org/2000/svg">
+      <rect class="bd1-leg" x="13" y="58" width="9" height="14" rx="4"/>
+      <rect class="bd1-leg" x="34" y="58" width="9" height="14" rx="4"/>
+      <rect class="bd1-body-shell" x="10" y="36" width="36" height="26" rx="10"/>
+      <g class="bd1-head-group">
+        <line class="bd1-antenna" x1="28" y1="18" x2="28" y2="8"/>
+        <circle class="bd1-antenna-tip" cx="28" cy="6" r="3"/>
+        <rect class="bd1-head-shell" x="12" y="18" width="32" height="22" rx="8"/>
+        <rect class="bd1-visor" x="15" y="23" width="26" height="11" rx="4"/>
+        <rect class="bd1-eye-glow" x="17" y="25" width="10" height="7" rx="2"/>
+      </g>
+    </svg>
+  </div>
   <div class="quick-cmds">
     <button class="quick-cmd" onclick="sendCmd('cd ~ && claude\n')">claude</button>
     <button class="quick-cmd" onclick="sendCmd('cd ~/assistant && git status\n')">git status</button>
@@ -482,6 +700,26 @@
     <button class="quick-cmd" onclick="sendCmd('htop\n')">htop</button>
     <button class="quick-cmd" onclick="sendCmd('clear\n')">clear</button>
   </div>
+</div>
+
+<!-- ══════════════ CONTROL CENTER VIEW ══════════════ -->
+<div class="view" id="viewControl">
+  <div class="controls-view" id="controlsContainer">
+    <!-- populated by JS -->
+  </div>
+  <!-- corner BD-1 -->
+  <svg class="bd1-corner" id="bd1CtrlCorner" style="position:fixed;bottom:80px;right:10px;" viewBox="0 0 56 76" xmlns="http://www.w3.org/2000/svg">
+    <rect class="bd1-leg" x="13" y="58" width="9" height="14" rx="4"/>
+    <rect class="bd1-leg" x="34" y="58" width="9" height="14" rx="4"/>
+    <rect class="bd1-body-shell" x="10" y="36" width="36" height="26" rx="10"/>
+    <g class="bd1-head-group">
+      <line class="bd1-antenna" x1="28" y1="18" x2="28" y2="8"/>
+      <circle class="bd1-antenna-tip" cx="28" cy="6" r="3"/>
+      <rect class="bd1-head-shell" x="12" y="18" width="32" height="22" rx="8"/>
+      <rect class="bd1-visor" x="15" y="23" width="26" height="11" rx="4"/>
+      <rect class="bd1-eye-glow" x="17" y="25" width="10" height="7" rx="2"/>
+    </g>
+  </svg>
 </div>
 
 <!-- ── Mobile toolbar ── -->
@@ -517,9 +755,7 @@
   <div class="cfg-body">
     <div>
       <div class="cfg-section-title">Voice Module</div>
-      <div class="voice-grid" id="voiceGrid">
-        <div class="voice-btn" style="opacity:.4">Loading...</div>
-      </div>
+      <div class="voice-grid" id="voiceGrid"><div class="voice-btn" style="opacity:.4">Loading...</div></div>
     </div>
     <div>
       <div class="cfg-section-title">Speech Rate</div>
@@ -541,6 +777,7 @@
 </div>
 
 <script>
+  // ── State ──────────────────────────────────────────────────────────────────
   const SESSION_ID = 'web-' + Math.random().toString(36).slice(2, 7);
   let isStreaming   = false;
   let ttsEnabled    = false;
@@ -551,18 +788,42 @@
 
   document.getElementById('statSession').textContent = SESSION_ID.slice(4).toUpperCase();
 
-  // ── Mode toggle ─────────────────────────────────────────────────────────────
+  // ── BD-1 ───────────────────────────────────────────────────────────────────
+  function showBD1Thinking() {
+    const el = document.getElementById('bd1Indicator');
+    el.classList.add('visible');
+    el.classList.remove('talking');
+    document.getElementById('bd1BubbleText').textContent = '';
+  }
+  function showBD1Talking(text) {
+    const el = document.getElementById('bd1Indicator');
+    el.classList.add('visible', 'talking');
+    const bt = document.getElementById('bd1BubbleText');
+    bt.textContent = text;
+    bt.scrollTop = bt.scrollHeight;
+  }
+  function hideBD1() {
+    const el = document.getElementById('bd1Indicator');
+    el.classList.remove('visible', 'talking');
+  }
+
+  function exciteBD1(cornerId) {
+    const el = document.getElementById(cornerId);
+    if (!el) return;
+    el.classList.add('active', 'excited');
+    setTimeout(() => el.classList.remove('excited', 'active'), 2000);
+  }
+
+  // ── Mode toggle ────────────────────────────────────────────────────────────
   function toggleMode() {
     claudeMode = !claudeMode;
     document.body.classList.toggle('claude-mode', claudeMode);
-
     const label = claudeMode ? 'CLAUDE' : 'LOCAL';
     document.getElementById('modeToggleDesk').textContent = label;
     document.getElementById('modeToggleMob').querySelector('span').textContent = label;
     document.getElementById('modeToggleMob').classList.toggle('active', claudeMode);
     document.getElementById('modeToggleDesk').classList.toggle('active', claudeMode);
     document.getElementById('statMode').textContent = label;
-
     if (claudeMode) {
       document.getElementById('modeBannerLabel').textContent = 'CLAUDE · SONNET 4.6';
       document.getElementById('modeBannerSub').textContent   = 'RUNNING VIA PI · FULL TOOL ACCESS';
@@ -572,14 +833,12 @@
       document.getElementById('modeBannerSub').textContent   = 'RUNNING ON LAPTOP VIA ETHERNET';
       document.getElementById('statModel').textContent = 'QWEN';
     }
-
-    // Clear chat on mode switch
     stopTTS();
     document.getElementById('messages').innerHTML = '';
     fetch(`/sessions/${SESSION_ID}/clear`);
   }
 
-  // ── TTS ─────────────────────────────────────────────────────────────────────
+  // ── TTS ────────────────────────────────────────────────────────────────────
   function toggleTTS() {
     ttsEnabled = !ttsEnabled;
     const label = ttsEnabled ? 'TTS ON' : 'TTS OFF';
@@ -604,7 +863,7 @@
     ttsPlaying = true;
     const text = ttsQueue.shift();
     try {
-      const r    = await fetch('/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+      const r    = await fetch('/tts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text}) });
       const blob = await r.blob();
       const url  = URL.createObjectURL(blob);
       currentAudio = new Audio(url);
@@ -619,7 +878,7 @@
     ttsPlaying = false;
   }
 
-  // ── Health ──────────────────────────────────────────────────────────────────
+  // ── Health ─────────────────────────────────────────────────────────────────
   async function checkHealth() {
     try {
       const d = await (await fetch('/health')).json();
@@ -635,13 +894,13 @@
   setInterval(checkHealth, 5000);
   checkHealth();
 
-  // ── Messages ────────────────────────────────────────────────────────────────
+  // ── Messages ───────────────────────────────────────────────────────────────
   function addMessage(role, content, streaming = false) {
     const msgs = document.getElementById('messages');
     const div  = document.createElement('div');
     div.className = `msg ${role}${streaming ? ' streaming' : ''}`;
     const aiLabel = claudeMode ? 'CLAUDE' : 'QWEN';
-    div.innerHTML = `<div class="msg-meta">${role === 'user' ? 'YOU' : aiLabel} · ${new Date().toLocaleTimeString()}</div><div class="msg-bubble"></div>`;
+    div.innerHTML = `<div class="msg-meta">${role==='user'?'YOU':aiLabel} · ${new Date().toLocaleTimeString()}</div><div class="msg-bubble"></div>`;
     div.querySelector('.msg-bubble').textContent = content;
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
@@ -654,7 +913,7 @@
     document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
   }
 
-  // ── Send ────────────────────────────────────────────────────────────────────
+  // ── Send ───────────────────────────────────────────────────────────────────
   async function sendMessage() {
     const input = document.getElementById('input');
     const msg   = input.value.trim();
@@ -667,23 +926,21 @@
     document.getElementById('sendBtn').disabled = true;
     document.getElementById('statusDot').className    = 'status-dot busy';
     document.getElementById('statusText').textContent  = 'PROCESSING';
+    showBD1Thinking();
 
     addMessage('user', msg);
     const aiDiv = addMessage('ai', '', true);
-
     const endpoint = claudeMode ? '/claude' : '/chat';
 
     try {
       const r = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, session_id: SESSION_ID + (claudeMode ? '-claude' : ''), stream: true }),
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message: msg, session_id: SESSION_ID + (claudeMode?'-claude':''), stream: true }),
       });
 
       const reader  = r.body.getReader();
       const decoder = new TextDecoder();
-      let full    = '';
-      let wordBuf = '';
+      let full = '', wordBuf = '';
       stopTTS();
 
       while (true) {
@@ -692,6 +949,7 @@
         const chunk = decoder.decode(value, { stream: true });
         full += chunk;
         updateMessage(aiDiv, full);
+        showBD1Talking(full);
         for (const char of chunk) {
           wordBuf += char;
           if (/[.!?;]/.test(char) && wordBuf.trim().length > 2) {
@@ -706,28 +964,29 @@
       updateMessage(aiDiv, 'Connection error: ' + e.message, true);
     }
 
+    hideBD1();
     isStreaming = false;
     document.getElementById('sendBtn').disabled = false;
     document.getElementById('statusDot').className    = 'status-dot online';
     document.getElementById('statusText').textContent  = 'ONLINE';
   }
 
-  // ── Queue ───────────────────────────────────────────────────────────────────
+  // ── Queue ──────────────────────────────────────────────────────────────────
   async function pollJob(jobId) {
     const iv = setInterval(async () => {
       const d = await (await fetch(`/queue/${jobId}`)).json();
       queuedJobs[jobId] = d;
       renderQueue();
       document.getElementById('statQueued').textContent =
-        Object.values(queuedJobs).filter(j => ['queued','processing'].includes(j.status)).length;
-      if (d.status === 'done' || d.status === 'error') clearInterval(iv);
+        Object.values(queuedJobs).filter(j=>['queued','processing'].includes(j.status)).length;
+      if (d.status==='done'||d.status==='error') clearInterval(iv);
     }, 1000);
   }
 
   function renderQueue() {
     const list = document.getElementById('queueList');
     list.innerHTML = '';
-    Object.entries(queuedJobs).reverse().forEach(([id, job]) => {
+    Object.entries(queuedJobs).reverse().forEach(([id,job]) => {
       const div = document.createElement('div');
       div.className = `queue-item ${job.status}`;
       div.textContent = `[${id}] ${(job.message||'').slice(0,22)}`;
@@ -736,31 +995,496 @@
     });
   }
 
-  // ── Clear ───────────────────────────────────────────────────────────────────
+  // ── Clear ──────────────────────────────────────────────────────────────────
   async function clearSession() {
-    stopTTS();
+    stopTTS(); hideBD1();
     await fetch(`/sessions/${SESSION_ID}/clear`);
     await fetch(`/sessions/${SESSION_ID}-claude/clear`);
     document.getElementById('messages').innerHTML = '';
   }
 
-  // ── Input ───────────────────────────────────────────────────────────────────
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  }
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  // ── Input helpers ──────────────────────────────────────────────────────────
+  function handleKey(e) { if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); sendMessage(); } }
+  function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  let termInitialized = false;
+  let term, fitAddon, termSocket;
+
+  function switchTab(tab) {
+    ['chat','term','control'].forEach(t => {
+      document.getElementById('view'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+      document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+    });
+    document.querySelector('.toolbar').style.display = tab==='term' ? 'none' : '';
+    if (tab==='term' && !termInitialized) initTerminal();
+    if (tab==='term' && fitAddon) setTimeout(()=>fitAddon.fit(), 100);
+    if (tab==='control') loadControls();
   }
 
-  // ── Config ──────────────────────────────────────────────────────────────────
+  // ── Terminal ───────────────────────────────────────────────────────────────
+  function initTerminal() {
+    termInitialized = true;
+    term = new Terminal({
+      fontFamily: '"Share Tech Mono", monospace',
+      fontSize: 13, lineHeight: 1.3,
+      cursorBlink: true, cursorStyle: 'block', scrollback: 2000,
+      theme: {
+        background: '#020812', foreground: '#eef2f8',
+        cursor: '#40b4ff', cursorAccent: '#020812',
+        selectionBackground: '#0088ff44',
+        black: '#040f1e', red: '#ff4040', green: '#40e080',
+        yellow: '#ffaa40', blue: '#0088ff', magenta: '#8040ff',
+        cyan: '#40c8ff', white: '#eef2f8',
+        brightBlack: '#1a3a5c', brightRed: '#ff6060', brightGreen: '#60f0a0',
+        brightYellow: '#ffc060', brightBlue: '#40b4ff', brightMagenta: '#a060ff',
+        brightCyan: '#60d8ff', brightWhite: '#ffffff',
+      }
+    });
+    fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('termContainer'));
+    fitAddon.fit();
+
+    const proto = location.protocol==='https:'?'wss':'ws';
+    termSocket = new WebSocket(`${proto}://${location.host}/ws/terminal`);
+    termSocket.binaryType = 'arraybuffer';
+    termSocket.onopen    = () => termSocket.send(JSON.stringify({type:'resize',cols:term.cols,rows:term.rows}));
+    termSocket.onmessage = (e) => { if (e.data instanceof ArrayBuffer) term.write(new Uint8Array(e.data)); else term.write(e.data); };
+    termSocket.onclose   = () => term.write('\r\n\x1b[33m[connection closed]\x1b[0m\r\n');
+    term.onData(data => { if (termSocket.readyState===WebSocket.OPEN) termSocket.send(new TextEncoder().encode(data)); });
+    term.onResize(({cols,rows}) => { if (termSocket.readyState===WebSocket.OPEN) termSocket.send(JSON.stringify({type:'resize',cols,rows})); });
+    window.addEventListener('resize', () => { if (fitAddon) fitAddon.fit(); });
+  }
+
+  function sendCmd(cmd) {
+    if (!term||!termSocket||termSocket.readyState!==WebSocket.OPEN) return;
+    termSocket.send(new TextEncoder().encode(cmd));
+    term.focus();
+  }
+
+  // ── Control Center ─────────────────────────────────────────────────────────
+  let controlsData = {};
+  let potAnimInterval = null;
+
+  async function loadControls() {
+    try {
+      const controls = await (await fetch('/controls')).json();
+      renderControls(controls);
+    } catch(e) { console.warn('Controls load error:', e); }
+  }
+
+  function renderControls(controls) {
+    const container = document.getElementById('controlsContainer');
+    // preserve expanded state
+    const expanded = {};
+    container.querySelectorAll('.ctrl-card.open').forEach(c => expanded[c.dataset.id] = true);
+    container.innerHTML = '';
+    controls.forEach(ctrl => {
+      controlsData[ctrl.id] = ctrl;
+      const card = buildControlCard(ctrl, !!expanded[ctrl.id]);
+      container.appendChild(card);
+    });
+  }
+
+  function getSecondaryStatus(ctrl) {
+    switch(ctrl.id) {
+      case 'coffee_maker':  return `${Math.round(ctrl.pot_level||0)}% FULL`;
+      case 'thermostat':    return `${ctrl.temp_f||72}°F`;
+      case 'security_cam':  return `${ctrl.clips_today||0} CLIPS`;
+      case 'door_lock':     return ctrl.locked !== false ? 'LOCKED' : 'UNLOCKED';
+      case 'irrigation':    return `NEXT ${ctrl.next_run||'—'}`;
+      case 'printer_3d':    return `${ctrl.progress||0}% DONE`;
+      case 'nas_storage':   return `${ctrl.storage_pct||0}% USED`;
+      case 'ups_battery':   return `${ctrl.charge_pct||0}% CHG`;
+      case 'media_server':  return `${ctrl.active_streams||0} STREAM${ctrl.active_streams!==1?'S':''}`;
+      case 'pi_monitor':    return `${ctrl.cpu_temp||0}°C CPU`;
+      default: return null;
+    }
+  }
+
+  function buildControlCard(ctrl, isOpen) {
+    const card = document.createElement('div');
+    card.className = 'ctrl-card' + (isOpen ? ' open' : '');
+    card.dataset.id = ctrl.id;
+
+    const statusLabel = ctrl.running ? 'RUNNING' : 'STANDBY';
+    const statusClass = ctrl.running ? 'running' : 'off';
+    const secondary = getSecondaryStatus(ctrl);
+
+    card.innerHTML = `
+      <div class="ctrl-header" onclick="toggleControlCard('${ctrl.id}')">
+        <div class="ctrl-left">
+          <div class="ctrl-icon">${ctrl.icon}</div>
+          <div>
+            <div class="ctrl-name">${ctrl.name}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;">
+              <div class="ctrl-status-badge ${statusClass}" id="badge-${ctrl.id}">${statusLabel}</div>
+              ${secondary ? `<div class="ctrl-secondary">${secondary}</div>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="ctrl-chevron">▼</div>
+      </div>
+      <div class="ctrl-expanded">
+        <div class="ctrl-expanded-inner" id="expanded-${ctrl.id}">
+          ${buildControlBody(ctrl)}
+        </div>
+      </div>`;
+    return card;
+  }
+
+  function buildControlBody(ctrl) {
+    switch(ctrl.id) {
+
+      case 'coffee_maker': return `
+        <div class="ctrl-toggle-row">
+          <span class="ctrl-toggle-label">Power</span>
+          <div class="toggle-switch ${ctrl.running?'on':''}" id="toggle-${ctrl.id}" onclick="toggleControl('${ctrl.id}')">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+        <div class="pot-section">
+          <div class="pot-label">
+            <span>Pot Level</span>
+            <span id="pot-pct-label">${Math.round(ctrl.pot_level||0)}%</span>
+          </div>
+          <div class="pot-graphic">
+            <svg class="pot-svg" viewBox="0 0 70 80" xmlns="http://www.w3.org/2000/svg">
+              <defs><clipPath id="potClip"><rect x="8" y="10" width="48" height="58" rx="6"/></clipPath></defs>
+              <rect x="8" y="10" width="48" height="58" rx="6" fill="rgba(0,136,255,0.08)" stroke="rgba(0,136,255,0.3)" stroke-width="1.5"/>
+              <path d="M56 28 Q68 28 68 40 Q68 52 56 52" fill="none" stroke="rgba(0,136,255,0.3)" stroke-width="1.5"/>
+              <rect id="pot-fill-${ctrl.id}" class="pot-fill-rect"
+                x="9" y="${68-(ctrl.pot_level||0)*0.57}" width="46" height="${(ctrl.pot_level||0)*0.57}"
+                fill="rgba(80,40,10,0.7)" clip-path="url(#potClip)"/>
+              <rect x="12" y="14" width="8" height="50" rx="3" fill="rgba(255,255,255,0.04)" clip-path="url(#potClip)"/>
+              <path d="M8 20 Q2 20 2 28 Q2 36 8 36" fill="none" stroke="rgba(0,136,255,0.3)" stroke-width="1.5"/>
+              <rect x="16" y="6" width="32" height="6" rx="3" fill="rgba(0,136,255,0.15)" stroke="rgba(0,136,255,0.3)" stroke-width="1"/>
+              <circle cx="32" cy="5" r="3" fill="rgba(0,136,255,0.4)"/>
+            </svg>
+            <div class="pot-pct" id="pot-pct-display">${Math.round(ctrl.pot_level||0)}%</div>
+          </div>
+        </div>
+        <div class="ctrl-btn-row">
+          <button class="ctrl-btn">⏱ Set Timer</button>
+          <button class="ctrl-btn">🔄 Daily Auto</button>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Filter Age</div>
+            <div class="ctrl-info-cell-value" style="font-size:13px;color:var(--green)">GOOD</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Last Brew</div>
+            <div class="ctrl-info-cell-value" style="font-size:14px;">07:32</div>
+          </div>
+        </div>`;
+
+      case 'thermostat': return `
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Current</div>
+            <div class="ctrl-info-cell-value">${ctrl.temp_f||72}°F</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Set Point</div>
+            <div class="ctrl-info-cell-value">${ctrl.setpoint_f||70}°F</div>
+          </div>
+        </div>
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>Temperature</span><span>${ctrl.temp_f||72}°F</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill" style="width:${Math.min(100,((ctrl.temp_f||72)-55)/45*100).toFixed(1)}%"></div></div>
+          <div class="ctrl-progress-label" style="font-size:8px;margin-top:-2px;"><span>55°F</span><span>100°F</span></div>
+        </div>
+        <div class="ctrl-btn-row">
+          <button class="ctrl-btn" style="color:var(--accent2)">❄️ Cool</button>
+          <button class="ctrl-btn" style="color:var(--red)">🔥 Heat</button>
+          <button class="ctrl-btn">🌀 Auto</button>
+        </div>
+        <div class="ctrl-toggle-row">
+          <span class="ctrl-toggle-label">Schedule Active</span>
+          <div class="toggle-switch on" onclick="void(0)"><div class="toggle-knob"></div></div>
+        </div>`;
+
+      case 'security_cam': return `
+        <div style="background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:10px;height:78px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+          <div style="font-size:30px;opacity:0.6;">📷</div>
+          <div style="position:absolute;top:7px;right:9px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red);letter-spacing:2px;">● REC</div>
+          <div style="position:absolute;bottom:7px;left:9px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);">CAM-01 · LIVE</div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Motion</div>
+            <div class="ctrl-info-cell-value" style="font-size:13px;color:var(--green);">${ctrl.motion_detected?'ACTIVE':'CLEAR'}</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Clips Today</div>
+            <div class="ctrl-info-cell-value">${ctrl.clips_today||0}</div>
+          </div>
+        </div>
+        <div class="ctrl-toggle-row">
+          <span class="ctrl-toggle-label">Recording</span>
+          <div class="toggle-switch ${ctrl.running?'on':''}" id="toggle-${ctrl.id}" onclick="toggleControl('${ctrl.id}')"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="ctrl-btn-row">
+          <button class="ctrl-btn">📂 View Clips</button>
+          <button class="ctrl-btn">⚙️ Sensitivity</button>
+        </div>`;
+
+      case 'door_lock': {
+        const locked = ctrl.locked !== false;
+        return `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0;">
+          <div style="font-size:52px;">${locked?'🔒':'🔓'}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:${locked?'var(--green)':'var(--red)'};">${locked?'SECURED':'UNLOCKED'}</div>
+        </div>
+        <button class="ctrl-btn" style="text-align:center;font-size:14px;letter-spacing:3px;border-color:${locked?'var(--red)':'var(--green)'};color:${locked?'var(--red)':'var(--green)'};" onclick="toggleControl('${ctrl.id}')">
+          ${locked?'🔓 UNLOCK':'🔒 LOCK'}
+        </button>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Last Activity</div>
+            <div class="ctrl-info-cell-value" style="font-size:12px;">${ctrl.last_activity||'—'}</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Auto-Lock</div>
+            <div class="ctrl-info-cell-value" style="font-size:14px;">5 MIN</div>
+          </div>
+        </div>`;
+      }
+
+      case 'irrigation': return `
+        <div class="ctrl-toggle-row">
+          <span class="ctrl-toggle-label">Water Now</span>
+          <div class="toggle-switch ${ctrl.running?'on':''}" id="toggle-${ctrl.id}" onclick="toggleControl('${ctrl.id}')"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Active Zone</div>
+            <div class="ctrl-info-cell-value" style="font-size:15px;">${ctrl.zone||'Zone A'}</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Next Run</div>
+            <div class="ctrl-info-cell-value" style="font-size:12px;">${ctrl.next_run||'—'}</div>
+          </div>
+        </div>
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>Soil Moisture</span><span>42%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill green" style="width:42%"></div></div>
+        </div>
+        <div class="ctrl-btn-row">
+          <button class="ctrl-btn">⏱ Duration</button>
+          <button class="ctrl-btn">📅 Schedule</button>
+        </div>`;
+
+      case 'printer_3d': {
+        const prog = ctrl.progress || 64;
+        return `
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>Print Progress</span><span>${prog}%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill" style="width:${prog}%"></div></div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">ETA</div>
+            <div class="ctrl-info-cell-value">${ctrl.eta_min||47}m</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Status</div>
+            <div class="ctrl-info-cell-value" style="font-size:11px;color:var(--green);">PRINTING</div>
+          </div>
+        </div>
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>Filament</span><span>78%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill green" style="width:78%"></div></div>
+        </div>
+        <button class="ctrl-btn" style="text-align:center;color:var(--red);border-color:var(--red);">⏹ Cancel Print</button>`;
+      }
+
+      case 'nas_storage': {
+        const used = ctrl.storage_pct || 58;
+        const fillClass = used > 85 ? 'red' : used < 50 ? 'green' : '';
+        return `
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>Storage Used</span><span>${used}%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill ${fillClass}" style="width:${used}%"></div></div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Used</div>
+            <div class="ctrl-info-cell-value" style="font-size:14px;">5.8 TB</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Free</div>
+            <div class="ctrl-info-cell-value" style="font-size:14px;">4.2 TB</div>
+          </div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Drives</div>
+            <div class="ctrl-info-cell-value">${ctrl.drives||4}</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">RAID</div>
+            <div class="ctrl-info-cell-value" style="font-size:11px;color:var(--green);">HEALTHY</div>
+          </div>
+        </div>
+        <div class="ctrl-btn-row">
+          <button class="ctrl-btn">🔄 Scrub</button>
+          <button class="ctrl-btn">📊 Stats</button>
+        </div>`;
+      }
+
+      case 'ups_battery': {
+        const chg = ctrl.charge_pct || 94;
+        const chgClass = chg < 20 ? 'red' : chg > 60 ? 'green' : '';
+        return `
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>Battery Charge</span><span>${chg}%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill ${chgClass}" style="width:${chg}%"></div></div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Runtime</div>
+            <div class="ctrl-info-cell-value">${ctrl.runtime_min||38}m</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Status</div>
+            <div class="ctrl-info-cell-value" style="font-size:11px;color:var(--green);">ON LINE</div>
+          </div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Load</div>
+            <div class="ctrl-info-cell-value" style="font-size:15px;">23W</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Input</div>
+            <div class="ctrl-info-cell-value" style="font-size:15px;">120V</div>
+          </div>
+        </div>`;
+      }
+
+      case 'media_server': return `
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Active Streams</div>
+            <div class="ctrl-info-cell-value">${ctrl.active_streams||1}</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Library</div>
+            <div class="ctrl-info-cell-value" style="font-size:13px;">${(ctrl.library_size||2847).toLocaleString()}</div>
+          </div>
+        </div>
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>Transcode CPU</span><span>18%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill" style="width:18%"></div></div>
+        </div>
+        <div class="ctrl-btn-row">
+          <button class="ctrl-btn">📋 Sessions</button>
+          <button class="ctrl-btn">🔄 Rescan</button>
+        </div>
+        <div class="ctrl-toggle-row">
+          <span class="ctrl-toggle-label">Hardware Accel</span>
+          <div class="toggle-switch on" onclick="void(0)"><div class="toggle-knob"></div></div>
+        </div>`;
+
+      case 'pi_monitor': {
+        const temp = ctrl.cpu_temp || 52;
+        const ram  = ctrl.ram_pct  || 41;
+        const tempColor = temp > 70 ? 'var(--red)' : temp > 58 ? 'var(--accent2)' : 'var(--green)';
+        return `
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">CPU Temp</div>
+            <div class="ctrl-info-cell-value" style="color:${tempColor};">${temp}°C</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Uptime</div>
+            <div class="ctrl-info-cell-value" style="font-size:14px;">3d 14h</div>
+          </div>
+        </div>
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>RAM Usage</span><span>${ram}%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill ${ram>80?'red':''}" style="width:${ram}%"></div></div>
+        </div>
+        <div class="ctrl-progress">
+          <div class="ctrl-progress-label"><span>CPU Usage</span><span>12%</span></div>
+          <div class="ctrl-progress-bar"><div class="ctrl-progress-fill" style="width:12%"></div></div>
+        </div>
+        <div class="ctrl-info-grid">
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Frequency</div>
+            <div class="ctrl-info-cell-value" style="font-size:13px;">2.4GHz</div>
+          </div>
+          <div class="ctrl-info-cell">
+            <div class="ctrl-info-cell-label">Throttling</div>
+            <div class="ctrl-info-cell-value" style="font-size:11px;color:var(--green);">NONE</div>
+          </div>
+        </div>`;
+      }
+
+      default:
+        return `<div style="color:var(--text-dim);font-size:12px;letter-spacing:2px">NO CONTROLS DEFINED</div>`;
+    }
+  }
+
+  function toggleControlCard(id) {
+    const card = document.querySelector(`.ctrl-card[data-id="${id}"]`);
+    if (!card) return;
+    const wasOpen = card.classList.contains('open');
+    card.classList.toggle('open');
+    if (!wasOpen && id === 'coffee_maker') startPotAnimation(id);
+    else if (wasOpen && id === 'coffee_maker') stopPotAnimation();
+  }
+
+  async function toggleControl(id) {
+    try {
+      const updated = await (await fetch(`/controls/${id}/toggle`, {method:'POST'})).json();
+      controlsData[id] = updated;
+      // update badge
+      const badge = document.getElementById(`badge-${id}`);
+      const tog   = document.getElementById(`toggle-${id}`);
+      if (badge) { badge.textContent = updated.running ? 'RUNNING' : 'STANDBY'; badge.className = `ctrl-status-badge ${updated.running?'running':'off'}`; }
+      if (tog)   { tog.classList.toggle('on', updated.running); }
+      exciteBD1('bd1CtrlCorner');
+    } catch(e) { console.warn(e); }
+  }
+
+  function startPotAnimation(id) {
+    stopPotAnimation();
+    let level = 0;
+    let dir   = 1;
+    potAnimInterval = setInterval(() => {
+      level += dir * 0.8;
+      if (level >= 100) { level = 100; dir = -1; }
+      if (level <= 0)   { level = 0;   dir = 1; }
+      updatePotLevel(id, level);
+    }, 50);
+  }
+
+  function stopPotAnimation() {
+    if (potAnimInterval) { clearInterval(potAnimInterval); potAnimInterval = null; }
+  }
+
+  function updatePotLevel(id, pct) {
+    const fill  = document.getElementById(`pot-fill-${id}`);
+    const label = document.getElementById('pot-pct-label');
+    const disp  = document.getElementById('pot-pct-display');
+    const h = pct * 0.57;
+    const y = 68 - h;
+    if (fill)  { fill.setAttribute('height', h); fill.setAttribute('y', y); }
+    if (label) label.textContent = Math.round(pct) + '%';
+    if (disp)  disp.textContent  = Math.round(pct) + '%';
+  }
+
+  // ── Config ─────────────────────────────────────────────────────────────────
   async function openConfig() {
     document.getElementById('cfgOverlay').classList.add('open');
     document.getElementById('cfgPanel').classList.add('open');
     try {
       const [cfgR, voiceR] = await Promise.all([fetch('/tts/config'), fetch('/tts/voices')]);
-      const cfg    = await cfgR.json();
-      const voices = await voiceR.json();
+      const cfg = await cfgR.json(); const voices = await voiceR.json();
       document.getElementById('lsSlider').value = cfg.length_scale;
       document.getElementById('lsVal').textContent = parseFloat(cfg.length_scale).toFixed(2);
       selectedVoice = cfg.voice;
@@ -778,120 +1502,62 @@
     const grid = document.getElementById('voiceGrid');
     grid.innerHTML = '';
     voices.forEach(v => {
-      const parts   = v.split('-');
-      const speaker = parts.slice(1, -1).join(' ');
-      const lang    = parts[0];
-      const quality = parts[parts.length - 1];
+      const parts = v.split('-');
       const btn = document.createElement('button');
-      btn.className = 'voice-btn' + (v === current ? ' selected' : '');
-      btn.innerHTML = `${speaker.toUpperCase()}<span class="voice-tag">${lang} · ${quality}</span>`;
-      btn.onclick = () => {
-        document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedVoice = v;
-      };
+      btn.className = 'voice-btn' + (v===current?' selected':'');
+      btn.innerHTML = `${parts.slice(1,-1).join(' ').toUpperCase()}<span class="voice-tag">${parts[0]} · ${parts[parts.length-1]}</span>`;
+      btn.onclick = () => { document.querySelectorAll('.voice-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); selectedVoice=v; };
       grid.appendChild(btn);
     });
   }
 
   async function applyConfig() {
     try {
-      await fetch('/tts/config', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ voice: selectedVoice, length_scale: parseFloat(document.getElementById('lsSlider').value) }),
-      });
+      await fetch('/tts/config', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ voice: selectedVoice, length_scale: parseFloat(document.getElementById('lsSlider').value) }) });
       const fb = document.getElementById('cfgFeedback');
-      fb.textContent = '// CONFIG APPLIED';
-      fb.style.opacity = '1';
-      setTimeout(() => { fb.style.opacity = '0'; }, 2500);
-    } catch(e) {
-      document.getElementById('cfgFeedback').textContent = 'ERROR: ' + e.message;
-    }
+      fb.textContent = '// CONFIG APPLIED'; fb.style.opacity='1';
+      setTimeout(()=>{ fb.style.opacity='0'; }, 2500);
+    } catch(e) { document.getElementById('cfgFeedback').textContent = 'ERROR: '+e.message; }
   }
 
-  // ── Tab switching ─────────────────────────────────────────────────────────
-  let termInitialized = false;
-  let term, fitAddon, termSocket;
+  // ── Inertia scroll ─────────────────────────────────────────────────────────
+  function addInertiaScroll(el) {
+    let startY = 0, startScroll = 0, velY = 0, lastY = 0, lastT = 0;
+    let rafId = null, dragging = false;
 
-  function switchTab(tab) {
-    document.getElementById('viewChat').classList.toggle('active', tab === 'chat');
-    document.getElementById('viewTerm').classList.toggle('active', tab === 'term');
-    document.getElementById('tabChat').classList.toggle('active', tab === 'chat');
-    document.getElementById('tabTerm').classList.toggle('active', tab === 'term');
-    document.querySelector('.toolbar').style.display = tab === 'term' ? 'none' : '';
-    if (tab === 'term' && !termInitialized) initTerminal();
-    if (tab === 'term' && fitAddon) setTimeout(() => fitAddon.fit(), 100);
+    el.addEventListener('touchstart', e => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      dragging = true; velY = 0;
+      startY = lastY = e.touches[0].clientY;
+      startScroll = el.scrollTop;
+      lastT = performance.now();
+    }, { passive: true });
+
+    el.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      const y = e.touches[0].clientY;
+      const now = performance.now();
+      const dt  = Math.max(now - lastT, 1);
+      velY = (lastY - y) / dt * 16;
+      el.scrollTop = startScroll + (startY - y);
+      lastY = y; lastT = now;
+    }, { passive: true });
+
+    el.addEventListener('touchend', () => {
+      dragging = false;
+      const glide = () => {
+        velY *= 0.91;
+        el.scrollTop += velY;
+        if (Math.abs(velY) > 0.4) rafId = requestAnimationFrame(glide);
+        else rafId = null;
+      };
+      rafId = requestAnimationFrame(glide);
+    }, { passive: true });
   }
 
-  function initTerminal() {
-    termInitialized = true;
-    term = new Terminal({
-      fontFamily: '"Share Tech Mono", monospace',
-      fontSize: 13,
-      lineHeight: 1.3,
-      cursorBlink: true,
-      cursorStyle: 'block',
-      scrollback: 2000,
-      theme: {
-        background:         '#141210',
-        foreground:         '#d4c4a8',
-        cursor:             '#e08840',
-        cursorAccent:       '#141210',
-        selectionBackground:'#c4722a44',
-        black:              '#1c1914',
-        red:                '#8b3020',
-        green:              '#5a9a48',
-        yellow:             '#c4722a',
-        blue:               '#4a7a9b',
-        magenta:            '#7a5a8b',
-        cyan:               '#4a8a7a',
-        white:              '#d4c4a8',
-        brightBlack:        '#5a5040',
-        brightRed:          '#c04030',
-        brightGreen:        '#7ab858',
-        brightYellow:       '#e08840',
-        brightBlue:         '#5a9abb',
-        brightMagenta:      '#9a7aab',
-        brightCyan:         '#5aaa9a',
-        brightWhite:        '#f0e8d8',
-      }
-    });
-
-    fitAddon = new FitAddon.FitAddon();
-    term.loadAddon(fitAddon);
-    term.open(document.getElementById('termContainer'));
-    fitAddon.fit();
-
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    termSocket = new WebSocket(`${proto}://${location.host}/ws/terminal`);
-    termSocket.binaryType = 'arraybuffer';
-
-    termSocket.onopen = () => {
-      termSocket.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
-    };
-    termSocket.onmessage = (e) => {
-      if (e.data instanceof ArrayBuffer) term.write(new Uint8Array(e.data));
-      else term.write(e.data);
-    };
-    termSocket.onclose = () => term.write('\r\n\x1b[33m[connection closed]\x1b[0m\r\n');
-
-    term.onData(data => {
-      if (termSocket.readyState === WebSocket.OPEN)
-        termSocket.send(new TextEncoder().encode(data));
-    });
-    term.onResize(({ cols, rows }) => {
-      if (termSocket.readyState === WebSocket.OPEN)
-        termSocket.send(JSON.stringify({ type: 'resize', cols, rows }));
-    });
-
-    window.addEventListener('resize', () => { if (fitAddon) fitAddon.fit(); });
-  }
-
-  function sendCmd(cmd) {
-    if (!term || !termSocket || termSocket.readyState !== WebSocket.OPEN) return;
-    termSocket.send(new TextEncoder().encode(cmd));
-    term.focus();
-  }
+  // apply inertia to controls scroll container once DOM ready
+  addInertiaScroll(document.getElementById('controlsContainer'));
 </script>
 </body>
 </html>

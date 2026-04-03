@@ -333,6 +333,69 @@ async def terminal_ws(websocket: WebSocket):
         pass
 
 
+# ── Controls ──────────────────────────────────────────────────────────────────
+controls_state = {
+    "coffee_maker": {
+        "id": "coffee_maker", "name": "Coffee Maker", "icon": "☕",
+        "running": False, "pot_level": 73,
+    },
+    "thermostat": {
+        "id": "thermostat", "name": "Thermostat", "icon": "🌡️",
+        "running": True, "temp_f": 72, "setpoint_f": 70, "mode": "cooling",
+    },
+    "security_cam": {
+        "id": "security_cam", "name": "Security Camera", "icon": "📷",
+        "running": True, "motion_detected": False, "clips_today": 3,
+    },
+    "door_lock": {
+        "id": "door_lock", "name": "Front Door", "icon": "🔒",
+        "running": False, "locked": True, "last_activity": "10:42 AM",
+    },
+    "irrigation": {
+        "id": "irrigation", "name": "Garden Irrigation", "icon": "🌿",
+        "running": False, "zone": "Zone A", "next_run": "06:00 AM",
+    },
+    "printer_3d": {
+        "id": "printer_3d", "name": "3D Printer", "icon": "🖨️",
+        "running": True, "progress": 64, "eta_min": 47,
+    },
+    "nas_storage": {
+        "id": "nas_storage", "name": "NAS Storage", "icon": "💾",
+        "running": True, "storage_pct": 58, "drives": 4,
+    },
+    "ups_battery": {
+        "id": "ups_battery", "name": "UPS Battery", "icon": "🔋",
+        "running": True, "charge_pct": 94, "runtime_min": 38,
+    },
+    "media_server": {
+        "id": "media_server", "name": "Media Server", "icon": "🎬",
+        "running": True, "active_streams": 1, "library_size": 2847,
+    },
+    "pi_monitor": {
+        "id": "pi_monitor", "name": "Pi Monitor", "icon": "🖥️",
+        "running": True, "cpu_temp": 52, "ram_pct": 41,
+    },
+}
+
+@app.get("/controls")
+async def get_controls():
+    return list(controls_state.values())
+
+@app.post("/controls/{control_id}/toggle")
+async def toggle_control(control_id: str):
+    if control_id not in controls_state:
+        raise HTTPException(status_code=404, detail="Control not found")
+    controls_state[control_id]["running"] = not controls_state[control_id]["running"]
+    return controls_state[control_id]
+
+@app.post("/controls/{control_id}/set")
+async def set_control(control_id: str, payload: dict):
+    if control_id not in controls_state:
+        raise HTTPException(status_code=404, detail="Control not found")
+    controls_state[control_id].update(payload)
+    return controls_state[control_id]
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "model": MODEL_ID, "queued_jobs": len(queue)}
