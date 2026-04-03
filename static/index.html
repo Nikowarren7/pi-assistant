@@ -626,10 +626,6 @@
       <div class="status-dot" id="statusDot"></div>
       <span id="statusText">CHECKING</span>
     </div>
-    <button class="hdr-btn" id="ttsToggleDesk" onclick="toggleTTS()">TTS OFF</button>
-    <button class="hdr-btn" id="modeToggleDesk" onclick="toggleMode()">LOCAL</button>
-    <button class="hdr-btn" onclick="openConfig()">CONFIG</button>
-    <button class="hdr-btn" onclick="clearSession()">CLEAR</button>
   </div>
 </header>
 
@@ -852,10 +848,8 @@
     claudeMode = !claudeMode;
     document.body.classList.toggle('claude-mode', claudeMode);
     const label = claudeMode ? 'CLAUDE' : 'LOCAL';
-    document.getElementById('modeToggleDesk').textContent = label;
     document.getElementById('modeToggleMob').querySelector('span').textContent = label;
     document.getElementById('modeToggleMob').classList.toggle('active', claudeMode);
-    document.getElementById('modeToggleDesk').classList.toggle('active', claudeMode);
     document.getElementById('statMode').textContent = label;
     if (claudeMode) {
       document.getElementById('modeBannerLabel').textContent = 'CLAUDE · SONNET 4.6';
@@ -875,9 +869,7 @@
   function toggleTTS() {
     ttsEnabled = !ttsEnabled;
     const label = ttsEnabled ? 'TTS ON' : 'TTS OFF';
-    document.getElementById('ttsToggleDesk').textContent = label;
     document.getElementById('ttsToggleMob').querySelector('span').textContent = label;
-    document.getElementById('ttsToggleDesk').classList.toggle('active', ttsEnabled);
     document.getElementById('ttsToggleMob').classList.toggle('active', ttsEnabled);
     if (!ttsEnabled) stopTTS();
   }
