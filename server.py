@@ -19,6 +19,7 @@ LM_STUDIO_URL  = "http://10.0.0.1:1234/v1/chat/completions"
 MODEL_ID       = "qwen2.5-14b-instruct"
 SYSTEM_PROMPT  = "You are a helpful local assistant running on a Raspberry Pi. Be concise and practical."
 HISTORY_LIMIT  = 10  # number of user+assistant turns to keep per session
+CLAUDE_CLI     = "claude"
 
 # ── TTS config (mutable at runtime) ──────────────────────────────────────────
 tts_config = {
@@ -214,6 +215,52 @@ async def tts(req: TTSRequest):
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
+@app.post("/claude")
+async def claude_chat(req: ChatRequest):
+    session_id = req.session_id or "claude-default"
+    if session_id not in sessions:
+        sessions[session_id] = []
+
+    sessions[session_id].append({"role": "user", "content": req.message})
+
+    # Build conversation context as a single prompt string for claude -p
+    history = sessions[session_id][-(HISTORY_LIMIT * 2):]
+    context = "\n\n".join(
+        f"{'User' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
+        for m in history[:-1]
+    )
+    prompt = (context + "\n\nUser: " + req.message).strip() if context else req.message
+
+    if req.stream:
+        async def stream_claude():
+            proc = await asyncio.create_subprocess_exec(
+                CLAUDE_CLI, "-p", prompt,
+                "--dangerously-skip-permissions",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+            full = ""
+            async for line in proc.stdout:
+                token = line.decode()
+                full += token
+                yield token
+            await proc.wait()
+            sessions[session_id].append({"role": "assistant", "content": full.strip()})
+
+        return StreamingResponse(stream_claude(), media_type="text/plain")
+    else:
+        proc = await asyncio.create_subprocess_exec(
+            CLAUDE_CLI, "-p", prompt,
+            "--dangerously-skip-permissions",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        stdout, _ = await proc.communicate()
+        result = stdout.decode().strip()
+        sessions[session_id].append({"role": "assistant", "content": result})
+        return {"reply": result, "session_id": session_id}
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "model": MODEL_ID, "queued_jobs": len(queue)}

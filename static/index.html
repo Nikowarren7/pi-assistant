@@ -6,29 +6,41 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PI" />
-  <meta name="theme-color" content="#0a0b0d" />
+  <meta name="theme-color" content="#141210" />
   <title>PI ASSISTANT</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
     :root {
-      --bg:       #0a0b0d;
-      --surface:  #0f1115;
-      --panel:    #13161b;
-      --border:   #1e2530;
-      --accent:   #bd6b08;
-      --accent2:  #e8890a;
-      --glow:     #e8890a55;
-      --glow2:    #e8890a22;
-      --text:     #c9bfae;
-      --text-dim: #5a5448;
-      --ai-msg:   #111318;
-      --user-msg: #1a1c22;
-      --scratch:  #2a1a05;
-      --red:      #8b2020;
-      --green:    #4caf50;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bot: env(safe-area-inset-bottom, 0px);
+      --bg:        #141210;
+      --surface:   #1c1914;
+      --panel:     #22201a;
+      --border:    #3a3228;
+      --accent:    #c4722a;
+      --accent2:   #e08840;
+      --glow:      #c4722a55;
+      --glow2:     #c4722a22;
+      --text:      #d4c4a8;
+      --text-dim:  #7a6a58;
+      --ai-msg:    #191610;
+      --user-msg:  #1f1c16;
+      --scratch:   #2a1a08;
+      --red:       #8b3020;
+      --green:     #5a9a48;
+      --blue:      #4a7a9b;
+      --blue2:     #5a9abb;
+      --blue-glow: #4a7a9b55;
+      --safe-top:  env(safe-area-inset-top, 0px);
+      --safe-bot:  env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Claude mode overrides accent to blue */
+    body.claude-mode {
+      --accent:  #4a7a9b;
+      --accent2: #5a9abb;
+      --glow:    #4a7a9b55;
+      --glow2:   #4a7a9b22;
+      --scratch: #081a2a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -42,20 +54,17 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transition: --accent .3s;
     }
 
     /* ── Header ── */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 10px 16px;
       padding-top: calc(10px + var(--safe-top));
       border-bottom: 1px solid var(--border);
       background: var(--surface);
-      flex-shrink: 0;
-      position: relative;
-      z-index: 10;
+      flex-shrink: 0; position: relative; z-index: 10;
     }
 
     .header-left { display: flex; align-items: center; gap: 10px; }
@@ -67,17 +76,15 @@
       clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
       background: var(--scratch);
       box-shadow: 0 0 10px var(--glow);
+      transition: border-color .3s, box-shadow .3s, background .3s;
     }
-    .logo-mark svg { width: 16px; height: 16px; fill: var(--accent2); }
+    .logo-mark svg { width: 16px; height: 16px; fill: var(--accent2); transition: fill .3s; }
 
     .title-block h1 {
-      font-size: 15px; font-weight: 700;
-      letter-spacing: 3px; color: var(--accent2); text-transform: uppercase;
+      font-size: 15px; font-weight: 700; letter-spacing: 3px;
+      color: var(--accent2); text-transform: uppercase; transition: color .3s;
     }
-    .title-block p {
-      font-size: 9px; letter-spacing: 2px;
-      color: var(--text-dim); text-transform: uppercase;
-    }
+    .title-block p { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
 
     .header-right { display: flex; align-items: center; gap: 10px; }
 
@@ -90,16 +97,36 @@
       width: 7px; height: 7px; border-radius: 50%; background: #444;
       transition: background .3s, box-shadow .3s; flex-shrink: 0;
     }
-    .status-dot.online  { background: var(--green); box-shadow: 0 0 6px #4caf5088; }
+    .status-dot.online  { background: var(--green); box-shadow: 0 0 6px #5a9a4888; }
     .status-dot.busy    { background: var(--accent2); box-shadow: 0 0 6px var(--glow); animation: pulse 1s infinite; }
     .status-dot.offline { background: var(--red); }
     #statusText { display: none; }
 
     /* ── Layout ── */
     .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-
-    /* ── Sidebar — desktop only ── */
     .sidebar { display: none; }
+
+    /* ── Mode banner ── */
+    .mode-banner {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .mode-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent2); display: flex; align-items: center; gap: 8px;
+      transition: color .3s;
+    }
+    .mode-label::before {
+      content: ''; width: 6px; height: 6px;
+      background: var(--accent2); border-radius: 50%;
+      box-shadow: 0 0 6px var(--glow);
+      transition: background .3s, box-shadow .3s;
+    }
+    .mode-sublabel { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; font-family: 'Share Tech Mono', monospace; }
 
     /* ── Chat ── */
     .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
@@ -113,39 +140,29 @@
 
     .msg { display: flex; flex-direction: column; gap: 3px; width: 100%; }
     .msg-meta {
-      font-size: 9px; letter-spacing: 2px;
-      text-transform: uppercase; color: var(--text-dim);
-      font-family: 'Share Tech Mono', monospace;
-      padding: 0 2px;
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); font-family: 'Share Tech Mono', monospace; padding: 0 2px;
     }
-    .msg.user .msg-meta { color: var(--accent); }
+    .msg.user .msg-meta { color: var(--accent); transition: color .3s; }
     .msg-bubble {
       padding: 10px 14px; border: 1px solid var(--border);
       line-height: 1.55; font-size: 15px;
-      white-space: pre-wrap; word-break: break-word;
-      border-radius: 2px;
+      white-space: pre-wrap; word-break: break-word; border-radius: 2px;
     }
-    .msg.user .msg-bubble { background: var(--user-msg); border-color: #252830; }
-    .msg.ai   .msg-bubble {
-      background: var(--ai-msg);
-      border-color: var(--border); border-left: 2px solid var(--accent);
-    }
-    .msg.ai.streaming .msg-bubble::after {
-      content: '▋'; color: var(--accent2); animation: blink .7s step-end infinite;
-    }
+    .msg.user .msg-bubble { background: var(--user-msg); border-color: #302c24; }
+    .msg.ai   .msg-bubble { background: var(--ai-msg); border-left: 2px solid var(--accent); transition: border-color .3s; }
+    .msg.ai.streaming .msg-bubble::after { content: '▋'; color: var(--accent2); animation: blink .7s step-end infinite; }
 
-    /* ── Input bar ── */
+    /* ── Input ── */
     .input-bar {
-      border-top: 1px solid var(--border);
-      background: var(--surface);
+      border-top: 1px solid var(--border); background: var(--surface);
       padding: 10px 12px;
       padding-bottom: calc(10px + var(--safe-bot));
       display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
     }
     .input-wrap {
       flex: 1; border: 1px solid var(--border); background: var(--panel);
-      display: flex; align-items: flex-end; transition: border-color .2s;
-      border-radius: 2px;
+      display: flex; align-items: flex-end; transition: border-color .2s; border-radius: 2px;
     }
     .input-wrap:focus-within { border-color: var(--accent); }
     textarea {
@@ -160,36 +177,41 @@
       font-family: 'Rajdhani', sans-serif; font-weight: 700;
       font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
       padding: 0 18px; cursor: pointer; height: 44px; flex-shrink: 0;
-      transition: background .2s, box-shadow .2s; border-radius: 2px;
-      min-width: 64px;
+      transition: background .2s, box-shadow .2s; border-radius: 2px; min-width: 64px;
     }
     .send-btn:active { background: var(--accent2); box-shadow: 0 0 16px var(--glow); }
     .send-btn:disabled { opacity: .4; }
 
-    /* ── Bottom toolbar (mobile) ── */
+    /* ── Bottom toolbar ── */
     .toolbar {
-      display: flex; align-items: center; justify-content: space-around;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
-      padding: 8px 16px;
-      padding-bottom: calc(8px + var(--safe-bot));
-      flex-shrink: 0;
-      gap: 8px;
+      display: flex; align-items: stretch; justify-content: space-around;
+      border-top: 1px solid var(--border); background: var(--surface);
+      padding: 6px 12px; padding-bottom: calc(6px + var(--safe-bot));
+      flex-shrink: 0; gap: 6px;
     }
     .tool-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
       background: none; border: 1px solid var(--border);
       color: var(--text-dim); font-family: 'Rajdhani', sans-serif;
       font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-      padding: 8px 12px; cursor: pointer; flex: 1; min-height: 48px;
-      transition: border-color .2s, color .2s, box-shadow .2s;
+      padding: 8px 10px; cursor: pointer; flex: 1; min-height: 50px;
+      transition: border-color .2s, color .2s, box-shadow .2s, background .2s;
       border-radius: 2px;
     }
-    .tool-btn svg { width: 18px; height: 18px; fill: currentColor; }
-    .tool-btn:active    { border-color: var(--accent); color: var(--accent2); }
-    .tool-btn.active    { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 8px var(--glow); }
+    .tool-btn svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+    .tool-btn:active { border-color: var(--accent); color: var(--accent2); }
+    .tool-btn.active  { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 8px var(--glow); background: var(--glow2); }
 
-    /* ── Config panel ── */
+    /* mode toggle special */
+    .mode-toggle-btn { position: relative; }
+    .mode-toggle-btn .mode-pip {
+      position: absolute; top: 6px; right: 6px;
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent2); box-shadow: 0 0 4px var(--glow);
+      transition: background .3s;
+    }
+
+    /* ── Config panel — slides up ── */
     .cfg-overlay {
       position: fixed; inset: 0; background: #00000077;
       z-index: 100; opacity: 0; pointer-events: none; transition: opacity .3s;
@@ -197,41 +219,29 @@
     .cfg-overlay.open { opacity: 1; pointer-events: all; }
 
     .cfg-panel {
-      position: fixed; bottom: -100%; left: 0; right: 0;
-      max-height: 88dvh;
-      background: var(--surface);
-      border-top: 1px solid var(--accent);
-      box-shadow: 0 -8px 40px #00000099, 0 -2px 0 var(--accent);
+      position: fixed; bottom: -100%; left: 0; right: 0; max-height: 88dvh;
+      background: var(--surface); border-top: 1px solid var(--accent);
+      box-shadow: 0 -8px 40px #00000099;
       z-index: 101; display: flex; flex-direction: column;
       transition: bottom .35s cubic-bezier(.4,0,.2,1);
-      border-radius: 12px 12px 0 0;
-      overflow: hidden;
+      border-radius: 12px 12px 0 0; overflow: hidden;
     }
     .cfg-panel.open { bottom: 0; }
 
-    .cfg-drag {
-      width: 40px; height: 4px; background: var(--border);
-      border-radius: 2px; margin: 10px auto 0;
-    }
+    .cfg-drag { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 10px auto 0; }
 
     .cfg-header {
-      padding: 12px 20px 12px;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(180deg, #1a1208 0%, var(--surface) 100%);
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #221a10 0%, var(--surface) 100%);
       flex-shrink: 0; position: relative;
     }
     .cfg-header::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
       background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+      transition: background .3s;
     }
-    .cfg-title {
-      font-size: 13px; font-weight: 700; letter-spacing: 4px;
-      color: var(--accent2); text-transform: uppercase;
-    }
-    .cfg-subtitle {
-      font-size: 9px; letter-spacing: 3px;
-      color: var(--text-dim); text-transform: uppercase; margin-top: 2px;
-    }
+    .cfg-title { font-size: 13px; font-weight: 700; letter-spacing: 4px; color: var(--accent2); text-transform: uppercase; transition: color .3s; }
+    .cfg-subtitle { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; margin-top: 2px; }
     .cfg-close {
       position: absolute; top: 12px; right: 16px;
       background: none; border: 1px solid var(--border);
@@ -247,45 +257,31 @@
     }
 
     .cfg-section-title {
-      font-size: 10px; letter-spacing: 4px; color: var(--accent);
-      text-transform: uppercase; margin-bottom: 12px;
-      padding-bottom: 6px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 8px;
+      font-size: 10px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase;
+      margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; transition: color .3s;
     }
     .cfg-section-title::before {
       content: ''; width: 3px; height: 12px; background: var(--accent2);
-      box-shadow: 0 0 6px var(--glow); flex-shrink: 0;
+      box-shadow: 0 0 6px var(--glow); flex-shrink: 0; transition: background .3s, box-shadow .3s;
     }
 
     .cfg-row { display: flex; flex-direction: column; gap: 8px; }
     .cfg-row-label { display: flex; justify-content: space-between; align-items: center; }
-    .cfg-row-label span:first-child {
-      font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--text);
-    }
-    .cfg-val {
-      font-family: 'Share Tech Mono', monospace; font-size: 14px;
-      color: var(--accent2); min-width: 40px; text-align: right;
-    }
+    .cfg-row-label span:first-child { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+    .cfg-val { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--accent2); min-width: 40px; text-align: right; transition: color .3s; }
 
-    input[type=range] {
-      -webkit-appearance: none; width: 100%; height: 4px;
-      background: var(--border); outline: none; cursor: pointer;
-    }
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--border); outline: none; cursor: pointer; }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 20px; height: 20px;
+      -webkit-appearance: none; width: 22px; height: 22px;
       background: var(--accent2); border-radius: 0;
       box-shadow: 0 0 8px var(--glow);
       clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+      transition: background .3s;
     }
-    input[type=range]::-moz-range-thumb {
-      width: 20px; height: 20px; background: var(--accent2); border: none; border-radius: 0;
-    }
-    .range-hints {
-      display: flex; justify-content: space-between; margin-top: 2px;
-    }
-    .range-hints span {
-      font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase;
-    }
+    input[type=range]::-moz-range-thumb { width: 22px; height: 22px; background: var(--accent2); border: none; border-radius: 0; }
+    .range-hints { display: flex; justify-content: space-between; margin-top: 2px; }
+    .range-hints span { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
 
     .voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .voice-btn {
@@ -293,22 +289,12 @@
       color: var(--text-dim); font-family: 'Share Tech Mono', monospace;
       font-size: 10px; padding: 12px 10px; cursor: pointer;
       text-align: left; line-height: 1.4; position: relative; overflow: hidden;
-      transition: border-color .2s, color .2s, background .2s;
-      min-height: 52px;
+      transition: border-color .2s, color .2s, background .2s; min-height: 52px;
     }
-    .voice-btn::before {
-      content: ''; position: absolute; top: 0; left: 0;
-      width: 2px; height: 100%; background: transparent; transition: background .2s;
-    }
-    .voice-btn.selected {
-      border-color: var(--accent2); color: var(--accent2);
-      background: var(--scratch); box-shadow: inset 0 0 12px var(--glow2);
-    }
+    .voice-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: transparent; transition: background .2s; }
+    .voice-btn.selected { border-color: var(--accent2); color: var(--accent2); background: var(--scratch); box-shadow: inset 0 0 12px var(--glow2); }
     .voice-btn.selected::before { background: var(--accent2); box-shadow: 0 0 6px var(--glow); }
-    .voice-tag {
-      font-size: 8px; letter-spacing: 2px; color: var(--text-dim);
-      text-transform: uppercase; display: block; margin-top: 3px;
-    }
+    .voice-tag { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; display: block; margin-top: 3px; }
     .voice-btn.selected .voice-tag { color: var(--accent); }
 
     .cfg-apply {
@@ -316,46 +302,27 @@
       font-family: 'Rajdhani', sans-serif; font-weight: 700;
       font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
       padding: 16px; cursor: pointer; width: 100%;
-      transition: background .2s, box-shadow .2s;
-      position: relative; overflow: hidden; min-height: 52px;
+      transition: background .2s, box-shadow .2s; min-height: 52px;
     }
     .cfg-apply:active { background: var(--accent2); box-shadow: 0 0 20px var(--glow); }
 
     .cfg-feedback {
       font-family: 'Share Tech Mono', monospace; font-size: 11px;
-      color: var(--green); letter-spacing: 2px; text-align: center;
-      min-height: 18px; transition: opacity .3s;
+      color: var(--green); letter-spacing: 2px; text-align: center; min-height: 18px; transition: opacity .3s;
     }
 
-    /* ── Scan line ── */
-    .scan-line {
-      position: fixed; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
-      opacity: 0; animation: scan 4s ease-in-out infinite;
-      pointer-events: none; z-index: 999;
-    }
-    @keyframes scan {
-      0%   { top: 0; opacity: 0; }
-      5%   { opacity: .5; }
-      95%  { opacity: .15; }
-      100% { top: 100%; opacity: 0; }
-    }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
     @keyframes blink { 50% { opacity: 0; } }
 
-    ::-webkit-scrollbar       { width: 3px; }
+    ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); }
 
-    /* ════════════════════════════════════════
-       DESKTOP — sidebar + full header
-    ════════════════════════════════════════ */
+    /* ════════════════ DESKTOP ════════════════ */
     @media (min-width: 700px) {
       #statusText { display: inline; }
-
-      .toolbar { display: none; }
-
-      header { padding: 10px 20px; }
+      .toolbar    { display: none; }
+      header      { padding: 10px 20px; }
 
       .hdr-btn {
         background: none; border: 1px solid var(--border);
@@ -368,58 +335,40 @@
       .hdr-btn.active { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 8px var(--glow); }
 
       .sidebar {
-        display: flex; flex-direction: column;
-        width: 200px; flex-shrink: 0;
-        border-right: 1px solid var(--border);
-        background: var(--surface);
-        padding: 16px 0; gap: 4px;
+        display: flex; flex-direction: column; width: 200px; flex-shrink: 0;
+        border-right: 1px solid var(--border); background: var(--surface); padding: 16px 0; gap: 4px;
       }
-      .sidebar-label {
-        font-size: 10px; letter-spacing: 3px; color: var(--text-dim);
-        text-transform: uppercase; padding: 0 16px 8px;
-      }
-      .stat-row {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 6px 16px; font-size: 12px;
-      }
-      .stat-row span:first-child {
-        color: var(--text-dim); letter-spacing: 1px;
-        text-transform: uppercase; font-size: 11px;
-      }
-      .stat-row span:last-child {
-        font-family: 'Share Tech Mono', monospace; color: var(--accent2); font-size: 12px;
-      }
+      .sidebar-label { font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; padding: 0 16px 8px; }
+      .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; font-size: 12px; }
+      .stat-row span:first-child { color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; font-size: 11px; }
+      .stat-row span:last-child  { font-family: 'Share Tech Mono', monospace; color: var(--accent2); font-size: 12px; }
       .divider { border: none; border-top: 1px solid var(--border); margin: 10px 16px; }
       .queue-list { flex: 1; overflow-y: auto; padding: 0 8px; }
       .queue-item {
         padding: 8px; font-size: 11px; font-family: 'Share Tech Mono', monospace;
         color: var(--text-dim); border-left: 2px solid transparent;
-        margin-bottom: 2px; cursor: pointer;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-bottom: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .queue-item.done       { border-color: var(--green); color: var(--text); }
       .queue-item.processing { border-color: var(--accent2); color: var(--accent2); animation: pulse 1s infinite; }
       .queue-item.error      { border-color: var(--red); }
 
-      .messages { padding: 20px; gap: 16px; }
+      .messages  { padding: 20px; gap: 16px; }
       .input-bar { padding: 14px 20px; }
 
-      /* config panel: side drawer on desktop */
       .cfg-panel {
         top: 0; bottom: auto; left: auto; right: -480px;
         width: 440px; max-height: 100%;
         border-top: none; border-left: 1px solid var(--accent);
-        box-shadow: -8px 0 40px #00000099, -2px 0 0 var(--accent);
+        box-shadow: -8px 0 40px #00000099;
         border-radius: 0; transition: right .35s cubic-bezier(.4,0,.2,1);
       }
-      .cfg-panel.open { right: 0; bottom: auto; }
+      .cfg-panel.open { right: 0; }
       .cfg-drag { display: none; }
     }
   </style>
 </head>
 <body>
-
-<div class="scan-line"></div>
 
 <!-- ── Header ── -->
 <header>
@@ -437,17 +386,24 @@
       <div class="status-dot" id="statusDot"></div>
       <span id="statusText">CHECKING</span>
     </div>
-    <!-- desktop buttons only -->
     <button class="hdr-btn" id="ttsToggleDesk" onclick="toggleTTS()">TTS OFF</button>
+    <button class="hdr-btn" id="modeToggleDesk" onclick="toggleMode()">LOCAL</button>
     <button class="hdr-btn" onclick="openConfig()">CONFIG</button>
     <button class="hdr-btn" onclick="clearSession()">CLEAR</button>
   </div>
 </header>
 
+<!-- ── Mode banner ── -->
+<div class="mode-banner">
+  <div class="mode-label" id="modeBannerLabel">LOCAL · QWEN 2.5 14B</div>
+  <div class="mode-sublabel" id="modeBannerSub">RUNNING ON LAPTOP VIA ETHERNET</div>
+</div>
+
 <!-- ── Main ── -->
 <div class="main">
   <div class="sidebar">
     <div class="sidebar-label">System</div>
+    <div class="stat-row"><span>Mode</span><span id="statMode">LOCAL</span></div>
     <div class="stat-row"><span>Model</span><span id="statModel">—</span></div>
     <div class="stat-row"><span>Session</span><span id="statSession">—</span></div>
     <div class="stat-row"><span>Queued</span><span id="statQueued">0</span></div>
@@ -472,15 +428,20 @@
 <div class="toolbar">
   <button class="tool-btn" id="ttsToggleMob" onclick="toggleTTS()">
     <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-    TTS OFF
+    <span>TTS OFF</span>
+  </button>
+  <button class="tool-btn mode-toggle-btn" id="modeToggleMob" onclick="toggleMode()">
+    <div class="mode-pip"></div>
+    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5v-3H9v3L5.5 12 9 8.5v3h6v-3l3.5 3.5-3.5 3.5z"/></svg>
+    <span>LOCAL</span>
   </button>
   <button class="tool-btn" onclick="openConfig()">
     <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-    CONFIG
+    <span>CONFIG</span>
   </button>
   <button class="tool-btn" onclick="clearSession()">
     <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-    CLEAR
+    <span>CLEAR</span>
   </button>
 </div>
 
@@ -494,14 +455,12 @@
     <button class="cfg-close" onclick="closeConfig()">✕</button>
   </div>
   <div class="cfg-body">
-
     <div>
       <div class="cfg-section-title">Voice Module</div>
       <div class="voice-grid" id="voiceGrid">
         <div class="voice-btn" style="opacity:.4">Loading...</div>
       </div>
     </div>
-
     <div>
       <div class="cfg-section-title">Speech Rate</div>
       <div class="cfg-row">
@@ -514,31 +473,58 @@
         <div class="range-hints"><span>Fast</span><span>Slow</span></div>
       </div>
     </div>
-
     <div>
       <button class="cfg-apply" onclick="applyConfig()">APPLY CONFIGURATION</button>
       <div class="cfg-feedback" id="cfgFeedback"></div>
     </div>
-
   </div>
 </div>
 
 <script>
   const SESSION_ID = 'web-' + Math.random().toString(36).slice(2, 7);
-  let isStreaming  = false;
-  let ttsEnabled   = false;
-  let currentAudio = null;
+  let isStreaming   = false;
+  let ttsEnabled    = false;
+  let claudeMode    = false;
+  let currentAudio  = null;
   let selectedVoice = 'en_US-lessac-medium';
   const queuedJobs  = {};
 
   document.getElementById('statSession').textContent = SESSION_ID.slice(4).toUpperCase();
+
+  // ── Mode toggle ─────────────────────────────────────────────────────────────
+  function toggleMode() {
+    claudeMode = !claudeMode;
+    document.body.classList.toggle('claude-mode', claudeMode);
+
+    const label = claudeMode ? 'CLAUDE' : 'LOCAL';
+    document.getElementById('modeToggleDesk').textContent = label;
+    document.getElementById('modeToggleMob').querySelector('span').textContent = label;
+    document.getElementById('modeToggleMob').classList.toggle('active', claudeMode);
+    document.getElementById('modeToggleDesk').classList.toggle('active', claudeMode);
+    document.getElementById('statMode').textContent = label;
+
+    if (claudeMode) {
+      document.getElementById('modeBannerLabel').textContent = 'CLAUDE · SONNET 4.6';
+      document.getElementById('modeBannerSub').textContent   = 'RUNNING VIA PI · FULL TOOL ACCESS';
+      document.getElementById('statModel').textContent = 'CLAUDE';
+    } else {
+      document.getElementById('modeBannerLabel').textContent = 'LOCAL · QWEN 2.5 14B';
+      document.getElementById('modeBannerSub').textContent   = 'RUNNING ON LAPTOP VIA ETHERNET';
+      document.getElementById('statModel').textContent = 'QWEN';
+    }
+
+    // Clear chat on mode switch
+    stopTTS();
+    document.getElementById('messages').innerHTML = '';
+    fetch(`/sessions/${SESSION_ID}/clear`);
+  }
 
   // ── TTS ─────────────────────────────────────────────────────────────────────
   function toggleTTS() {
     ttsEnabled = !ttsEnabled;
     const label = ttsEnabled ? 'TTS ON' : 'TTS OFF';
     document.getElementById('ttsToggleDesk').textContent = label;
-    document.getElementById('ttsToggleMob').childNodes[2].textContent = '\n    ' + label + '\n  ';
+    document.getElementById('ttsToggleMob').querySelector('span').textContent = label;
     document.getElementById('ttsToggleDesk').classList.toggle('active', ttsEnabled);
     document.getElementById('ttsToggleMob').classList.toggle('active', ttsEnabled);
     if (!ttsEnabled) stopTTS();
@@ -564,7 +550,7 @@
       currentAudio = new Audio(url);
       currentAudio.play();
       currentAudio.onended = () => { URL.revokeObjectURL(url); playNextChunk(); };
-    } catch(e) { playNextChunk(); }
+    } catch { playNextChunk(); }
   }
 
   function stopTTS() {
@@ -577,13 +563,13 @@
   async function checkHealth() {
     try {
       const d = await (await fetch('/health')).json();
-      document.getElementById('statusDot').className   = 'status-dot online';
-      document.getElementById('statusText').textContent = 'ONLINE';
-      document.getElementById('statModel').textContent  = d.model.split('-')[0].toUpperCase();
-      document.getElementById('statQueued').textContent = d.queued_jobs;
+      document.getElementById('statusDot').className    = 'status-dot online';
+      document.getElementById('statusText').textContent  = 'ONLINE';
+      if (!claudeMode) document.getElementById('statModel').textContent = d.model.split('-')[0].toUpperCase();
+      document.getElementById('statQueued').textContent  = d.queued_jobs;
     } catch {
-      document.getElementById('statusDot').className   = 'status-dot offline';
-      document.getElementById('statusText').textContent = 'OFFLINE';
+      document.getElementById('statusDot').className    = 'status-dot offline';
+      document.getElementById('statusText').textContent  = 'OFFLINE';
     }
   }
   setInterval(checkHealth, 5000);
@@ -594,7 +580,8 @@
     const msgs = document.getElementById('messages');
     const div  = document.createElement('div');
     div.className = `msg ${role}${streaming ? ' streaming' : ''}`;
-    div.innerHTML = `<div class="msg-meta">${role === 'user' ? 'YOU' : 'QWEN'} · ${new Date().toLocaleTimeString()}</div><div class="msg-bubble"></div>`;
+    const aiLabel = claudeMode ? 'CLAUDE' : 'QWEN';
+    div.innerHTML = `<div class="msg-meta">${role === 'user' ? 'YOU' : aiLabel} · ${new Date().toLocaleTimeString()}</div><div class="msg-bubble"></div>`;
     div.querySelector('.msg-bubble').textContent = content;
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
@@ -618,17 +605,19 @@
     autoResize(input);
     input.blur();
     document.getElementById('sendBtn').disabled = true;
-    document.getElementById('statusDot').className   = 'status-dot busy';
-    document.getElementById('statusText').textContent = 'PROCESSING';
+    document.getElementById('statusDot').className    = 'status-dot busy';
+    document.getElementById('statusText').textContent  = 'PROCESSING';
 
     addMessage('user', msg);
     const aiDiv = addMessage('ai', '', true);
 
+    const endpoint = claudeMode ? '/claude' : '/chat';
+
     try {
-      const r = await fetch('/chat', {
+      const r = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, session_id: SESSION_ID, stream: true }),
+        body: JSON.stringify({ message: msg, session_id: SESSION_ID + (claudeMode ? '-claude' : ''), stream: true }),
       });
 
       const reader  = r.body.getReader();
@@ -659,8 +648,8 @@
 
     isStreaming = false;
     document.getElementById('sendBtn').disabled = false;
-    document.getElementById('statusDot').className   = 'status-dot online';
-    document.getElementById('statusText').textContent = 'ONLINE';
+    document.getElementById('statusDot').className    = 'status-dot online';
+    document.getElementById('statusText').textContent  = 'ONLINE';
   }
 
   // ── Queue ───────────────────────────────────────────────────────────────────
@@ -691,10 +680,11 @@
   async function clearSession() {
     stopTTS();
     await fetch(`/sessions/${SESSION_ID}/clear`);
+    await fetch(`/sessions/${SESSION_ID}-claude/clear`);
     document.getElementById('messages').innerHTML = '';
   }
 
-  // ── Input helpers ───────────────────────────────────────────────────────────
+  // ── Input ───────────────────────────────────────────────────────────────────
   function handleKey(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
@@ -703,7 +693,7 @@
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
   }
 
-  // ── Config panel ────────────────────────────────────────────────────────────
+  // ── Config ──────────────────────────────────────────────────────────────────
   async function openConfig() {
     document.getElementById('cfgOverlay').classList.add('open');
     document.getElementById('cfgPanel').classList.add('open');
@@ -734,7 +724,6 @@
       const quality = parts[parts.length - 1];
       const btn = document.createElement('button');
       btn.className = 'voice-btn' + (v === current ? ' selected' : '');
-      btn.dataset.voice = v;
       btn.innerHTML = `${speaker.toUpperCase()}<span class="voice-tag">${lang} · ${quality}</span>`;
       btn.onclick = () => {
         document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('selected'));
@@ -747,15 +736,10 @@
 
   async function applyConfig() {
     try {
-      const r = await fetch('/tts/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          voice:        selectedVoice,
-          length_scale: parseFloat(document.getElementById('lsSlider').value),
-        }),
+      await fetch('/tts/config', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voice: selectedVoice, length_scale: parseFloat(document.getElementById('lsSlider').value) }),
       });
-      await r.json();
       const fb = document.getElementById('cfgFeedback');
       fb.textContent = '// CONFIG APPLIED';
       fb.style.opacity = '1';
