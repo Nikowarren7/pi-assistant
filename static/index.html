@@ -341,6 +341,7 @@
       user-select: none; -webkit-user-select: none;
       position: relative; z-index: 1;
       -webkit-transform: translateZ(0); transform: translateZ(0);
+      touch-action: manipulation;
     }
     .ctrl-left { display: flex; align-items: center; gap: 18px; }
     .ctrl-icon { font-size: 44px; line-height: 1; }
@@ -1118,7 +1119,11 @@
     // Build header separately so a body error never kills the header
     const hdr = document.createElement('div');
     hdr.className = 'ctrl-header';
-    hdr.setAttribute('onclick', `toggleControlCard('${ctrl.id}')`);
+    let tapping = false;
+    hdr.addEventListener('touchstart', () => { tapping = true; }, { passive: true });
+    hdr.addEventListener('touchmove',  () => { tapping = false; }, { passive: true });
+    hdr.addEventListener('touchend',   () => { if (tapping) { tapping = false; toggleControlCard(ctrl.id); } }, { passive: true });
+    hdr.addEventListener('click', () => toggleControlCard(ctrl.id));
     hdr.innerHTML = `
       <div class="ctrl-left">
         <div class="ctrl-icon">${ctrl.icon}</div>
