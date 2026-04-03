@@ -475,7 +475,7 @@
 <div class="view" id="viewTerm">
   <div class="term-container" id="termContainer"></div>
   <div class="quick-cmds">
-    <button class="quick-cmd" onclick="sendCmd('claude\n')">claude</button>
+    <button class="quick-cmd" onclick="sendCmd('cd ~ && claude\n')">claude</button>
     <button class="quick-cmd" onclick="sendCmd('cd ~/assistant && git status\n')">git status</button>
     <button class="quick-cmd" onclick="sendCmd('cd ~/assistant && git pull\n')">git pull</button>
     <button class="quick-cmd" onclick="sendCmd('pkill -f uvicorn; cd ~/assistant && python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 &\n')">restart server</button>
