@@ -1119,10 +1119,14 @@
     // Build header separately so a body error never kills the header
     const hdr = document.createElement('div');
     hdr.className = 'ctrl-header';
-    let tapping = false;
-    hdr.addEventListener('touchstart', () => { tapping = true; }, { passive: true });
-    hdr.addEventListener('touchmove',  () => { tapping = false; }, { passive: true });
-    hdr.addEventListener('touchend',   () => { if (tapping) { tapping = false; toggleControlCard(ctrl.id); } }, { passive: true });
+    let tapStartY = null;
+    hdr.addEventListener('touchstart', e => { tapStartY = e.touches[0].clientY; }, { passive: true });
+    hdr.addEventListener('touchend',   e => {
+      if (tapStartY !== null && Math.abs(e.changedTouches[0].clientY - tapStartY) < 10) {
+        toggleControlCard(ctrl.id);
+      }
+      tapStartY = null;
+    }, { passive: true });
     hdr.addEventListener('click', () => toggleControlCard(ctrl.id));
     hdr.innerHTML = `
       <div class="ctrl-left">
