@@ -306,11 +306,11 @@
 
     /* ════════════════ CONTROL CENTER ════════════════ */
     .controls-view {
-      flex: 1; min-height: 0; overflow-y: auto; padding: 14px 12px;
+      flex: 1; min-height: 0; overflow-y: scroll; padding: 14px 12px;
       padding-bottom: calc(14px + var(--safe-bot));
       display: flex; flex-direction: column; gap: 10px;
       -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
+      overscroll-behavior: contain;
       position: relative;
     }
     .controls-view::before {
@@ -1537,45 +1537,6 @@
     } catch(e) { document.getElementById('cfgFeedback').textContent = 'ERROR: '+e.message; }
   }
 
-  // ── Inertia scroll ─────────────────────────────────────────────────────────
-  function addInertiaScroll(el) {
-    let velY = 0, lastY = 0, lastT = 0;
-    let rafId = null, dragging = false;
-
-    el.addEventListener('touchstart', e => {
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-      dragging = true; velY = 0;
-      lastY = e.touches[0].clientY;
-      lastT = performance.now();
-    }, { passive: true });
-
-    // passive:false so we can preventDefault and own the scroll entirely
-    el.addEventListener('touchmove', e => {
-      if (!dragging) return;
-      e.preventDefault();
-      const y   = e.touches[0].clientY;
-      const now = performance.now();
-      const dt  = Math.max(now - lastT, 1);
-      const dy  = (lastY - y) * 50;
-      velY = dy / dt * 16;   // px/frame at 60 fps
-      el.scrollTop += dy;
-      lastY = y; lastT = now;
-    }, { passive: false });
-
-    el.addEventListener('touchend', () => {
-      dragging = false;
-      const glide = () => {
-        velY *= 0.85;
-        el.scrollTop += velY;
-        if (Math.abs(velY) > 0.5) rafId = requestAnimationFrame(glide);
-        else rafId = null;
-      };
-      rafId = requestAnimationFrame(glide);
-    }, { passive: true });
-  }
-
-  // apply inertia to controls scroll container once DOM ready
-  addInertiaScroll(document.getElementById('controlsContainer'));
 </script>
 </body>
 </html>
