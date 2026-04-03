@@ -1,13 +1,19 @@
 import asyncio
 import uuid
 import tempfile
+import pty
+import os
+import fcntl
+import termios
+import struct
+import json
 from datetime import datetime
 from typing import Optional
 from collections import deque
 from pathlib import Path
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -259,6 +265,72 @@ async def claude_chat(req: ChatRequest):
         result = stdout.decode().strip()
         sessions[session_id].append({"role": "assistant", "content": result})
         return {"reply": result, "session_id": session_id}
+
+
+@app.websocket("/ws/terminal")
+async def terminal_ws(websocket: WebSocket):
+    await websocket.accept()
+    loop = asyncio.get_event_loop()
+
+    master_fd, slave_fd = pty.openpty()
+
+    env = os.environ.copy()
+    env["TERM"] = "xterm-256color"
+    env["HOME"] = os.path.expanduser("~")
+
+    process = await asyncio.create_subprocess_exec(
+        "bash", "--login",
+        stdin=slave_fd, stdout=slave_fd, stderr=slave_fd,
+        close_fds=True, env=env,
+        cwd=os.path.expanduser("~"),
+    )
+    os.close(slave_fd)
+
+    def set_winsize(fd, rows, cols):
+        fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
+
+    set_winsize(master_fd, 24, 80)
+
+    async def read_pty():
+        while True:
+            try:
+                data = await loop.run_in_executor(None, lambda: os.read(master_fd, 4096))
+                await websocket.send_bytes(data)
+            except Exception:
+                break
+
+    async def write_pty():
+        while True:
+            try:
+                msg = await websocket.receive()
+                if "text" in msg:
+                    try:
+                        ctrl = json.loads(msg["text"])
+                        if ctrl.get("type") == "resize":
+                            set_winsize(master_fd, ctrl["rows"], ctrl["cols"])
+                    except Exception:
+                        pass
+                elif "bytes" in msg:
+                    os.write(master_fd, msg["bytes"])
+            except WebSocketDisconnect:
+                break
+            except Exception:
+                break
+
+    read_task  = asyncio.create_task(read_pty())
+    write_task = asyncio.create_task(write_pty())
+    done, pending = await asyncio.wait([read_task, write_task], return_when=asyncio.FIRST_COMPLETED)
+    for t in pending:
+        t.cancel()
+
+    try:
+        process.terminate()
+    except Exception:
+        pass
+    try:
+        os.close(master_fd)
+    except Exception:
+        pass
 
 
 @app.get("/health")

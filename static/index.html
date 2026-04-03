@@ -8,6 +8,9 @@
   <meta name="apple-mobile-web-app-title" content="PI" />
   <meta name="theme-color" content="#141210" />
   <title>PI ASSISTANT</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
@@ -318,6 +321,42 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); }
 
+    /* ── Tab switcher ── */
+    .tab-bar {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px; background: none; border: none;
+      color: var(--text-dim); font-family: 'Rajdhani', sans-serif;
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+    /* ── Views ── */
+    .view { display: none; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
+    .view.active { display: flex; }
+
+    /* ── Terminal ── */
+    .term-container { flex: 1; overflow: hidden; padding: 8px; background: var(--bg); }
+    .xterm { height: 100%; }
+
+    .quick-cmds {
+      border-top: 1px solid var(--border); background: var(--surface);
+      padding: 8px 10px; padding-bottom: calc(8px + var(--safe-bot));
+      display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0;
+    }
+    .quick-cmd {
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--text-dim); font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; padding: 6px 10px; cursor: pointer;
+      transition: border-color .2s, color .2s; border-radius: 2px;
+      letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .quick-cmd:active { border-color: var(--accent); color: var(--accent2); }
+
     /* ════════════════ DESKTOP ════════════════ */
     @media (min-width: 700px) {
       #statusText { display: inline; }
@@ -393,7 +432,14 @@
   </div>
 </header>
 
-<!-- ── Mode banner ── -->
+<!-- ── Tab bar ── -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabChat" onclick="switchTab('chat')">CHAT</button>
+  <button class="tab-btn" id="tabTerm" onclick="switchTab('term')">TERMINAL</button>
+</div>
+
+<!-- ── Chat view ── -->
+<div class="view active" id="viewChat">
 <div class="mode-banner">
   <div class="mode-label" id="modeBannerLabel">LOCAL · QWEN 2.5 14B</div>
   <div class="mode-sublabel" id="modeBannerSub">RUNNING ON LAPTOP VIA ETHERNET</div>
@@ -421,6 +467,20 @@
       </div>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()">SEND</button>
     </div>
+  </div>
+</div>
+</div><!-- end viewChat -->
+
+<!-- ── Terminal view ── -->
+<div class="view" id="viewTerm">
+  <div class="term-container" id="termContainer"></div>
+  <div class="quick-cmds">
+    <button class="quick-cmd" onclick="sendCmd('claude\n')">claude</button>
+    <button class="quick-cmd" onclick="sendCmd('cd ~/assistant && git status\n')">git status</button>
+    <button class="quick-cmd" onclick="sendCmd('cd ~/assistant && git pull\n')">git pull</button>
+    <button class="quick-cmd" onclick="sendCmd('pkill -f uvicorn; cd ~/assistant && python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 &\n')">restart server</button>
+    <button class="quick-cmd" onclick="sendCmd('htop\n')">htop</button>
+    <button class="quick-cmd" onclick="sendCmd('clear\n')">clear</button>
   </div>
 </div>
 
@@ -747,6 +807,90 @@
     } catch(e) {
       document.getElementById('cfgFeedback').textContent = 'ERROR: ' + e.message;
     }
+  }
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  let termInitialized = false;
+  let term, fitAddon, termSocket;
+
+  function switchTab(tab) {
+    document.getElementById('viewChat').classList.toggle('active', tab === 'chat');
+    document.getElementById('viewTerm').classList.toggle('active', tab === 'term');
+    document.getElementById('tabChat').classList.toggle('active', tab === 'chat');
+    document.getElementById('tabTerm').classList.toggle('active', tab === 'term');
+    document.querySelector('.toolbar').style.display = tab === 'term' ? 'none' : '';
+    if (tab === 'term' && !termInitialized) initTerminal();
+    if (tab === 'term' && fitAddon) setTimeout(() => fitAddon.fit(), 100);
+  }
+
+  function initTerminal() {
+    termInitialized = true;
+    term = new Terminal({
+      fontFamily: '"Share Tech Mono", monospace',
+      fontSize: 13,
+      lineHeight: 1.3,
+      cursorBlink: true,
+      cursorStyle: 'block',
+      scrollback: 2000,
+      theme: {
+        background:         '#141210',
+        foreground:         '#d4c4a8',
+        cursor:             '#e08840',
+        cursorAccent:       '#141210',
+        selectionBackground:'#c4722a44',
+        black:              '#1c1914',
+        red:                '#8b3020',
+        green:              '#5a9a48',
+        yellow:             '#c4722a',
+        blue:               '#4a7a9b',
+        magenta:            '#7a5a8b',
+        cyan:               '#4a8a7a',
+        white:              '#d4c4a8',
+        brightBlack:        '#5a5040',
+        brightRed:          '#c04030',
+        brightGreen:        '#7ab858',
+        brightYellow:       '#e08840',
+        brightBlue:         '#5a9abb',
+        brightMagenta:      '#9a7aab',
+        brightCyan:         '#5aaa9a',
+        brightWhite:        '#f0e8d8',
+      }
+    });
+
+    fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('termContainer'));
+    fitAddon.fit();
+
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    termSocket = new WebSocket(`${proto}://${location.host}/ws/terminal`);
+    termSocket.binaryType = 'arraybuffer';
+
+    termSocket.onopen = () => {
+      termSocket.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+    };
+    termSocket.onmessage = (e) => {
+      if (e.data instanceof ArrayBuffer) term.write(new Uint8Array(e.data));
+      else term.write(e.data);
+    };
+    termSocket.onclose = () => term.write('\r\n\x1b[33m[connection closed]\x1b[0m\r\n');
+
+    term.onData(data => {
+      if (termSocket.readyState === WebSocket.OPEN)
+        termSocket.send(new TextEncoder().encode(data));
+    });
+    term.onResize(({ cols, rows }) => {
+      if (termSocket.readyState === WebSocket.OPEN)
+        termSocket.send(JSON.stringify({ type: 'resize', cols, rows }));
+    });
+
+    window.addEventListener('resize', () => { if (fitAddon) fitAddon.fit(); });
+  }
+
+  function sendCmd(cmd) {
+    if (!term || !termSocket || termSocket.readyState !== WebSocket.OPEN) return;
+    termSocket.send(new TextEncoder().encode(cmd));
+    term.focus();
   }
 </script>
 </body>
