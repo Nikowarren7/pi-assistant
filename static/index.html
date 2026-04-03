@@ -323,9 +323,7 @@
 
     /* Glass card */
     .ctrl-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(24px) saturate(160%);
-      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      background: rgba(5,16,40,0.92);
       border: 1px solid var(--glass-border);
       border-radius: 18px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,136,255,0.12);
@@ -1112,25 +1110,38 @@
     const statusClass = ctrl.running ? 'running' : 'off';
     const secondary = getSecondaryStatus(ctrl);
 
-    card.innerHTML = `
-      <div class="ctrl-header" onclick="toggleControlCard('${ctrl.id}')">
-        <div class="ctrl-left">
-          <div class="ctrl-icon">${ctrl.icon}</div>
-          <div>
-            <div class="ctrl-name">${ctrl.name}</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;">
-              <div class="ctrl-status-badge ${statusClass}" id="badge-${ctrl.id}">${statusLabel}</div>
-              ${secondary ? `<div class="ctrl-secondary">${secondary}</div>` : ''}
-            </div>
+    // Build header separately so a body error never kills the header
+    const hdr = document.createElement('div');
+    hdr.className = 'ctrl-header';
+    hdr.setAttribute('onclick', `toggleControlCard('${ctrl.id}')`);
+    hdr.innerHTML = `
+      <div class="ctrl-left">
+        <div class="ctrl-icon">${ctrl.icon}</div>
+        <div>
+          <div class="ctrl-name">${ctrl.name}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <div class="ctrl-status-badge ${statusClass}" id="badge-${ctrl.id}">${statusLabel}</div>
+            ${secondary ? `<div class="ctrl-secondary">${secondary}</div>` : ''}
           </div>
         </div>
-        <div class="ctrl-chevron">▼</div>
       </div>
-      <div class="ctrl-expanded">
-        <div class="ctrl-expanded-inner" id="expanded-${ctrl.id}">
-          ${buildControlBody(ctrl)}
-        </div>
-      </div>`;
+      <div class="ctrl-chevron">▼</div>`;
+
+    const exp = document.createElement('div');
+    exp.className = 'ctrl-expanded';
+    const inner = document.createElement('div');
+    inner.className = 'ctrl-expanded-inner';
+    inner.id = 'expanded-' + ctrl.id;
+    try {
+      inner.innerHTML = buildControlBody(ctrl);
+    } catch(e) {
+      inner.innerHTML = `<div style="color:#ff6060;font-size:12px;letter-spacing:1px;">RENDER ERROR: ${e.message}</div>`;
+      console.error('buildControlBody failed for', ctrl.id, e);
+    }
+    exp.appendChild(inner);
+
+    card.appendChild(hdr);
+    card.appendChild(exp);
     return card;
   }
 
