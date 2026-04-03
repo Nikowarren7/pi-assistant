@@ -1121,13 +1121,13 @@
     hdr.className = 'ctrl-header';
     let tapStartY = null;
     hdr.addEventListener('touchstart', e => { tapStartY = e.touches[0].clientY; }, { passive: true });
-    hdr.addEventListener('touchend',   e => {
+    hdr.addEventListener('touchend', e => {
       if (tapStartY !== null && Math.abs(e.changedTouches[0].clientY - tapStartY) < 10) {
+        e.preventDefault();
         toggleControlCard(ctrl.id);
       }
       tapStartY = null;
-    }, { passive: true });
-    hdr.addEventListener('click', () => toggleControlCard(ctrl.id));
+    }, { passive: false });
     hdr.innerHTML = `
       <div class="ctrl-left">
         <div class="ctrl-icon">${ctrl.icon}</div>
