@@ -1556,7 +1556,7 @@
       const y   = e.touches[0].clientY;
       const now = performance.now();
       const dt  = Math.max(now - lastT, 1);
-      const dy  = (lastY - y) * 3125;
+      const dy  = lastY - y;
       velY = dy / dt * 16;   // px/frame at 60 fps
       el.scrollTop += dy;
       lastY = y; lastT = now;
@@ -1564,6 +1564,13 @@
 
     el.addEventListener('touchend', () => {
       dragging = false;
+      const glide = () => {
+        velY *= 0.85;
+        el.scrollTop += velY;
+        if (Math.abs(velY) > 0.5) rafId = requestAnimationFrame(glide);
+        else rafId = null;
+      };
+      rafId = requestAnimationFrame(glide);
     }, { passive: true });
   }
 
