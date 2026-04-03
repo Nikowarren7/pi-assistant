@@ -1539,33 +1539,42 @@
 
   // ── Inertia scroll ─────────────────────────────────────────────────────────
   function addInertiaScroll(el) {
-    let startY = 0, startScroll = 0, velY = 0, lastY = 0, lastT = 0;
+    let velY = 0, lastY = 0, lastT = 0;
     let rafId = null, dragging = false;
 
     el.addEventListener('touchstart', e => {
       if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
       dragging = true; velY = 0;
-      startY = lastY = e.touches[0].clientY;
-      startScroll = el.scrollTop;
+      lastY = e.touches[0].clientY;
       lastT = performance.now();
     }, { passive: true });
 
+    // passive:false so we can preventDefault and own the scroll entirely
     el.addEventListener('touchmove', e => {
       if (!dragging) return;
-      const y = e.touches[0].clientY;
+      e.preventDefault();
+      const y   = e.touches[0].clientY;
       const now = performance.now();
       const dt  = Math.max(now - lastT, 1);
-      velY = (lastY - y) / dt * 16;
-      el.scrollTop = startScroll + (startY - y);
+      const dy  = lastY - y;
+      velY = dy / dt * 16;   // px/frame at 60 fps
+      el.scrollTop += dy;    // 1:1 with finger
       lastY = y; lastT = now;
-    }, { passive: true });
+    }, { passive: false });
 
     el.addEventListener('touchend', () => {
       dragging = false;
+      const t0 = performance.now();
       const glide = () => {
-        velY *= 0.91;
-        el.scrollTop += velY;
-        if (Math.abs(velY) > 0.4) rafId = requestAnimationFrame(glide);
+        if (performance.now() - t0 < 100) {
+          // coast at full speed for 100 ms
+          el.scrollTop += velY;
+        } else {
+          // then brake hard
+          velY *= 0.72;
+          el.scrollTop += velY;
+        }
+        if (Math.abs(velY) > 0.5) rafId = requestAnimationFrame(glide);
         else rafId = null;
       };
       rafId = requestAnimationFrame(glide);
