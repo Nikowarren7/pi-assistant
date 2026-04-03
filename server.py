@@ -7,12 +7,14 @@ import fcntl
 import termios
 import struct
 import json
+import time
 from datetime import datetime
 from typing import Optional
 from collections import deque
 from pathlib import Path
 
 import httpx
+import psutil
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -335,47 +337,74 @@ async def terminal_ws(websocket: WebSocket):
 
 # ── Controls ──────────────────────────────────────────────────────────────────
 controls_state = {
-    "coffee_maker": {
-        "id": "coffee_maker", "name": "Coffee Maker", "icon": "☕",
-        "running": False, "pot_level": 73,
-    },
-    "thermostat": {
-        "id": "thermostat", "name": "Thermostat", "icon": "🌡️",
-        "running": True, "temp_f": 72, "setpoint_f": 70, "mode": "cooling",
-    },
-    "security_cam": {
-        "id": "security_cam", "name": "Security Camera", "icon": "📷",
-        "running": True, "motion_detected": False, "clips_today": 3,
-    },
-    "door_lock": {
-        "id": "door_lock", "name": "Front Door", "icon": "🔒",
-        "running": False, "locked": True, "last_activity": "10:42 AM",
-    },
-    "irrigation": {
-        "id": "irrigation", "name": "Garden Irrigation", "icon": "🌿",
-        "running": False, "zone": "Zone A", "next_run": "06:00 AM",
-    },
-    "printer_3d": {
-        "id": "printer_3d", "name": "3D Printer", "icon": "🖨️",
-        "running": True, "progress": 64, "eta_min": 47,
-    },
-    "nas_storage": {
-        "id": "nas_storage", "name": "NAS Storage", "icon": "💾",
-        "running": True, "storage_pct": 58, "drives": 4,
-    },
-    "ups_battery": {
-        "id": "ups_battery", "name": "UPS Battery", "icon": "🔋",
-        "running": True, "charge_pct": 94, "runtime_min": 38,
-    },
-    "media_server": {
-        "id": "media_server", "name": "Media Server", "icon": "🎬",
-        "running": True, "active_streams": 1, "library_size": 2847,
-    },
     "pi_monitor": {
         "id": "pi_monitor", "name": "Pi Monitor", "icon": "🖥️",
-        "running": True, "cpu_temp": 52, "ram_pct": 41,
+        "running": True,
     },
 }
+
+# ── Pi stats (psutil) ─────────────────────────────────────────────────────────
+_prev_net      = None
+_prev_net_time = None
+
+@app.get("/pi-stats")
+async def pi_stats():
+    global _prev_net, _prev_net_time
+
+    cpu_pct  = psutil.cpu_percent(interval=0.15)
+    mem      = psutil.virtual_memory()
+    disk     = psutil.disk_usage('/')
+    freq     = psutil.cpu_freq()
+    temps    = psutil.sensors_temperatures()
+    cpu_temp = None
+    for key in ('cpu_thermal', 'coretemp', 'k10temp'):
+        if key in temps and temps[key]:
+            cpu_temp = round(temps[key][0].current, 1)
+            break
+
+    net      = psutil.net_io_counters()
+    now      = time.time()
+    recv_kbps = sent_kbps = 0.0
+    if _prev_net and _prev_net_time:
+        dt = now - _prev_net_time
+        if dt > 0:
+            recv_kbps = (net.bytes_recv - _prev_net.bytes_recv) / dt / 1024
+            sent_kbps = (net.bytes_sent - _prev_net.bytes_sent) / dt / 1024
+    _prev_net      = net
+    _prev_net_time = now
+
+    boot    = datetime.fromtimestamp(psutil.boot_time())
+    up      = datetime.now() - boot
+    days    = up.days
+    hrs, r  = divmod(up.seconds, 3600)
+    mins    = r // 60
+    uptime  = f"{days}d {hrs}h {mins}m"
+
+    procs = []
+    for p in psutil.process_iter(['name', 'cpu_percent', 'memory_percent']):
+        try:
+            procs.append({'name': p.info['name'][:18],
+                          'cpu': round(p.info['cpu_percent'] or 0, 1),
+                          'mem': round(p.info['memory_percent'] or 0, 1)})
+        except Exception:
+            pass
+    procs = sorted(procs, key=lambda x: x['cpu'], reverse=True)[:6]
+
+    return {
+        'cpu_pct':      round(cpu_pct, 1),
+        'cpu_temp':     cpu_temp,
+        'cpu_freq_mhz': round(freq.current) if freq else 0,
+        'mem_pct':      round(mem.percent, 1),
+        'mem_used_gb':  round(mem.used  / 1e9, 2),
+        'mem_total_gb': round(mem.total / 1e9, 2),
+        'disk_pct':     round(disk.percent, 1),
+        'disk_used_gb': round(disk.used / 1e9, 1),
+        'disk_free_gb': round(disk.free / 1e9, 1),
+        'recv_kbps':    round(recv_kbps, 1),
+        'sent_kbps':    round(sent_kbps, 1),
+        'uptime':       uptime,
+        'processes':    procs,
+    }
 
 @app.get("/controls")
 async def get_controls():
