@@ -341,6 +341,14 @@ controls_state = {
         "id": "pi_monitor", "name": "Pi Monitor", "icon": "🖥️",
         "running": True,
     },
+    "wifi_speedtest": {
+        "id": "wifi_speedtest", "name": "WiFi Speed Test", "icon": "📡",
+        "running": False,
+        "download_mbps": None,
+        "upload_mbps": None,
+        "ping_ms": None,
+        "last_run": None,
+    },
 }
 
 # ── Pi stats (psutil) ─────────────────────────────────────────────────────────
@@ -423,6 +431,33 @@ async def set_control(control_id: str, payload: dict):
         raise HTTPException(status_code=404, detail="Control not found")
     controls_state[control_id].update(payload)
     return controls_state[control_id]
+
+
+@app.post("/speedtest")
+async def run_speedtest():
+    ctrl = controls_state["wifi_speedtest"]
+    if ctrl["running"]:
+        raise HTTPException(status_code=409, detail="Test already running")
+    ctrl["running"] = True
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "python3", "-m", "speedtest", "--json",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        stdout, _ = await proc.communicate()
+        data = json.loads(stdout.decode())
+        ctrl["download_mbps"] = round(data["download"] / 1e6, 2)
+        ctrl["upload_mbps"]   = round(data["upload"]   / 1e6, 2)
+        ctrl["ping_ms"]       = round(data["ping"], 1)
+        ctrl["last_run"]      = datetime.now().strftime("%H:%M:%S")
+    except Exception as e:
+        ctrl["download_mbps"] = None
+        ctrl["upload_mbps"]   = None
+        ctrl["ping_ms"]       = None
+    finally:
+        ctrl["running"] = False
+    return ctrl
 
 
 @app.get("/health")

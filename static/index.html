@@ -1114,6 +1114,7 @@
 
   function getSecondaryStatus(ctrl) {
     if (ctrl.id === 'pi_monitor') return 'LIVE';
+    if (ctrl.id === 'wifi_speedtest' && ctrl.last_run) return ctrl.last_run;
     return null;
   }
 
@@ -1170,6 +1171,38 @@
   }
 
   function buildControlBody(ctrl) {
+    if (ctrl.id === 'wifi_speedtest') {
+      const dl   = ctrl.download_mbps != null ? ctrl.download_mbps.toFixed(1) : '—';
+      const ul   = ctrl.upload_mbps   != null ? ctrl.upload_mbps.toFixed(1)   : '—';
+      const ping = ctrl.ping_ms       != null ? ctrl.ping_ms + ' ms'          : '—';
+      const maxMbps = 200;
+      const dlPct = ctrl.download_mbps != null ? Math.min(100, ctrl.download_mbps / maxMbps * 100).toFixed(1) : 0;
+      const ulPct = ctrl.upload_mbps   != null ? Math.min(100, ctrl.upload_mbps   / maxMbps * 100).toFixed(1) : 0;
+      return `
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="ctrl-progress">
+            <div class="ctrl-progress-label"><span>Download</span><span id="st-dl-val">${dl} Mbps</span></div>
+            <div class="ctrl-progress-bar"><div class="ctrl-progress-fill" id="st-dl-bar" style="width:${dlPct}%"></div></div>
+          </div>
+          <div class="ctrl-progress">
+            <div class="ctrl-progress-label"><span>Upload</span><span id="st-ul-val">${ul} Mbps</span></div>
+            <div class="ctrl-progress-bar"><div class="ctrl-progress-fill green" id="st-ul-bar" style="width:${ulPct}%"></div></div>
+          </div>
+          <div class="ctrl-info-grid">
+            <div class="ctrl-info-cell">
+              <div class="ctrl-info-cell-label">Ping</div>
+              <div class="ctrl-info-cell-value" id="st-ping" style="font-size:14px;">${ping}</div>
+            </div>
+            <div class="ctrl-info-cell">
+              <div class="ctrl-info-cell-label">Last Run</div>
+              <div class="ctrl-info-cell-value" id="st-last" style="font-size:13px;">${ctrl.last_run || '—'}</div>
+            </div>
+          </div>
+          <button class="ctrl-btn" id="st-run-btn" onclick="runSpeedtest()" style="text-align:center;letter-spacing:3px;font-size:13px;">
+            ▶ RUN TEST
+          </button>
+        </div>`;
+    }
     if (ctrl.id !== 'pi_monitor') return `<div style="color:var(--text-dim);font-size:12px;letter-spacing:2px">NO CONTROLS DEFINED</div>`;
     return `
       <div style="display:flex;flex-direction:column;gap:16px;">
@@ -1507,6 +1540,35 @@
       if (!wasOpen) startPiPoll();
       else          stopPiPoll();
     }
+  }
+
+  async function runSpeedtest() {
+    const btn = document.getElementById('st-run-btn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = '⏳ TESTING…';
+    try {
+      const res = await fetch('/speedtest', { method: 'POST' });
+      const d = await res.json();
+      const maxMbps = 200;
+      const dlPct = d.download_mbps != null ? Math.min(100, d.download_mbps / maxMbps * 100).toFixed(1) : 0;
+      const ulPct = d.upload_mbps   != null ? Math.min(100, d.upload_mbps   / maxMbps * 100).toFixed(1) : 0;
+      const dlEl = document.getElementById('st-dl-bar');
+      const ulEl = document.getElementById('st-ul-bar');
+      const dlVal = document.getElementById('st-dl-val');
+      const ulVal = document.getElementById('st-ul-val');
+      const ping  = document.getElementById('st-ping');
+      const last  = document.getElementById('st-last');
+      if (dlEl)  dlEl.style.width  = dlPct + '%';
+      if (ulEl)  ulEl.style.width  = ulPct + '%';
+      if (dlVal) dlVal.textContent = (d.download_mbps != null ? d.download_mbps.toFixed(1) : '—') + ' Mbps';
+      if (ulVal) ulVal.textContent = (d.upload_mbps   != null ? d.upload_mbps.toFixed(1)   : '—') + ' Mbps';
+      if (ping)  ping.textContent  = d.ping_ms != null ? d.ping_ms + ' ms' : '—';
+      if (last)  last.textContent  = d.last_run || '—';
+    } catch(e) {
+      console.error('Speedtest error:', e);
+    }
+    if (btn) { btn.disabled = false; btn.textContent = '▶ RUN TEST'; }
   }
 
   function startPiPoll() {
